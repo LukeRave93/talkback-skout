@@ -292,6 +292,18 @@
     .btn-end:hover { border-color: var(--error); color: var(--error); }
     .btn-end.ending { opacity: 0; pointer-events: none; }
 
+    .timer {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--dust);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.5rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .timer.ending { opacity: 0; }
+
     /* ── DONE ── */
     #state-done { opacity: 0; animation: rise 0.6s ease forwards; }
 
@@ -482,6 +494,7 @@
 
     <div class="transcript-wrap" id="transcript"></div>
     <button class="btn-end" id="btn-end">End conversation</button>
+    <div class="timer" id="timer">0:00</div>
   </div>
 
   <!-- STEP 3: Done -->
@@ -592,6 +605,25 @@
     }
   }
 
+  // ── Timer ─────────────────────────────────────────────────────────
+  let timerInterval = null;
+
+  function startTimer() {
+    const el = $('timer');
+    let secs = 0;
+    timerInterval = setInterval(() => {
+      secs++;
+      const m = Math.floor(secs / 60);
+      const s = String(secs % 60).padStart(2, '0');
+      el.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    $('timer').classList.add('ending');
+  }
+
   // ── Form submit ──────────────────────────────────────────────────────
   $('btn-start').addEventListener('click', async () => {
     const data = validate();
@@ -653,6 +685,7 @@
 
         onConnect: () => {
           $('status-label').textContent = 'Listening';
+          startTimer();
         },
 
         onMessage: ({ source, message }) => {
@@ -716,6 +749,7 @@
     endBtn.classList.add('ending');
     micWrap.classList.add('ending');
     micBtn.classList.add('ending');
+    stopTimer();
 
     // Wait for animation to complete (1.4s) then pop to done
     await new Promise(r => setTimeout(r, 1400));
