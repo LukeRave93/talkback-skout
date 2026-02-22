@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skout Organic × Talkback — Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F7F3EE;
+      --ink:   #1A1612;
+      --sage:  #4A6741;
+      --dust:  #C9BFB3;
+      --warm:  #E8DDD4;
+      --error: #9B5050;
+      --warn:  #8B6914;
+      --warn-bg: #FBF4E4;
+    }
+
+    html, body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Grain overlay — from original */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+    }
+
+    /* ── BRAND HEADER ── */
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2rem 2.5rem;
+      opacity: 0;
+      animation: rise 0.7s ease forwards;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
+
+    .brand-name {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 500;
+    }
+
+    .brand-meta {
+      font-size: 0.72rem;
+      color: var(--dust);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── UPLOAD SCREEN ── */
+    #screen-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 2rem;
+      text-align: center;
+      opacity: 0;
+      animation: rise 0.7s ease 0.15s forwards;
+    }
+
+    .headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+      max-width: 560px;
+    }
+
+    .headline em { font-style: italic; color: var(--sage); }
+
+    .subline {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: #6B5F55;
+      margin-bottom: 2.5rem;
+      max-width: 360px;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border: 1.5px dashed var(--warm);
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--sage);
+      background: #f5f9f4;
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+
+    .drop-text { font-size: 0.88rem; color: #6B5F55; }
+    .drop-text strong { color: var(--ink); font-weight: 500; }
+
+    .file-confirm {
+      font-size: 0.8rem;
+      color: var(--sage);
+      font-weight: 500;
+      min-height: 1.2em;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Primary button — from original */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      border-radius: 100px;
+      padding: 1rem 2.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+      outline: none;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .btn-primary:hover { background: var(--sage); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary.hidden { display: none; }
+
+    .note {
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      color: var(--dust);
+    }
+
+    .note a { color: var(--sage); text-decoration: none; font-weight: 500; }
+
+    /* ── LOADING SCREEN ── */
+    #screen-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    #screen-loading.active { display: flex; }
+
+    .loading-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .loading-sub { font-size: 0.88rem; color: #6B5F55; margin-bottom: 2.5rem; }
+
+    .progress-track {
+      width: 280px;
+      height: 2px;
+      background: var(--warm);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--sage);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 2px;
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      text-align: left;
+      width: 300px;
+    }
+
+    .l-step {
+      font-size: 0.82rem;
+      color: var(--dust);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: color 0.3s;
+    }
+
+    .l-step.active { color: var(--sage); font-weight: 500; }
+    .l-step.done   { color: var(--ink); }
+
+    .l-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── DASHBOARD ── */
+    #screen-dash {
+      display: none;
+      padding-bottom: 5rem;
+      animation: fade-in 0.5s ease forwards;
+    }
+
+    #screen-dash.active { display: block; }
+
+    /* Stats banner */
+    .stats-banner {
+      background: var(--ink);
+      color: var(--cream);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 2.5rem;
+      gap: 0;
+    }
+
+    .stat-block {
+      padding: 0 2rem 0 0;
+      border-right: 1px solid #333;
+    }
+
+    .stat-block:first-child { padding-left: 0; }
+    .stat-block:last-child  { border-right: none; padding-left: 2rem; padding-right: 0; }
+
+    .stat-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-num.sage { color: #7ab87a; }
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #888;
+      font-weight: 500;
+    }
+
+    /* Demo notice */
+    .demo-notice {
+      display: none;
+      margin: 1.5rem 2.5rem 0;
+      background: var(--warn-bg);
+      border-left: 3px solid #C9A227;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--warn);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .demo-notice.visible { display: block; }
+
+    /* Sections */
+    .section {
+      padding: 3rem 2.5rem;
+      border-bottom: 1px solid var(--warm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-title em { font-style: italic; color: var(--sage); }
+
+    .section-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--dust);
+      font-weight: 500;
+      border: 1px solid var(--warm);
+      padding: 0.25rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    /* Reasons grid */
+    .reasons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .reason-card {
+      background: white;
+      border: 1px solid var(--warm);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .reason-card:hover { border-color: var(--sage); }
+
+    .reason-pct {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.4rem;
+      color: var(--sage);
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+
+    .reason-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.4rem; }
+
+    .reason-desc { font-size: 0.82rem; color: #6B5F55; line-height: 1.6; margin-bottom: 1rem; }
+
+    .reason-bar {
+      height: 2px;
+      background: var(--warm);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .reason-bar-fill {
+      height: 100%;
+      background: var(--sage);
+      transition: width 1s ease;
+      border-radius: 2px;
+    }
+
+    /* Voices */
+    .voices-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .voice-card {
+      background: var(--warm);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .voice-quote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: var(--ink);
+    }
+
+    .voice-quote::before {
+      content: '\201C';
+      color: var(--dust);
+      font-size: 2.5rem;
+      line-height: 0;
+      vertical-align: -0.8rem;
+      margin-right: 2px;
+    }
+
+    .voice-chip {
+      display: inline-block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 500;
+      background: var(--ink);
+      color: var(--cream);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    /* Personas */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .persona-card {
+      background: white;
+      border: 1px solid var(--warm);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .persona-card:hover { border-color: var(--sage); }
+
+    .persona-emoji {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .persona-name { font-weight: 500; font-size: 1rem; margin-bottom: 0.2rem; }
+
+    .persona-arch {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sage);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .persona-desc { font-size: 0.82rem; color: #6B5F55; line-height: 1.65; margin-bottom: 1rem; }
+
+    .persona-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .persona-tag {
+      font-size: 0.68rem;
+      border: 1px solid var(--warm);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      color: #6B5F55;
+    }
+
+    /* Actions */
+    .actions-list { display: flex; flex-direction: column; border: 1px solid var(--warm); border-radius: 10px; overflow: hidden; }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      align-items: start;
+      padding: 1.5rem 1.75rem;
+      border-bottom: 1px solid var(--warm);
+      gap: 1.25rem;
+      background: white;
+      transition: background 0.15s;
+    }
+
+    .action-row:last-child { border-bottom: none; }
+    .action-row:hover { background: #fdfcfa; }
+
+    .action-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--dust);
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    .action-title { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .action-desc  { font-size: 0.82rem; color: #6B5F55; line-height: 1.65; }
+
+    .impact-chip {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      white-space: nowrap;
+      align-self: start;
+      margin-top: 3px;
+    }
+
+    .impact-high { background: #EBF3EB; color: var(--sage); }
+    .impact-med  { background: var(--warn-bg); color: var(--warn); }
+    .impact-low  { background: var(--warm); color: #6B5F55; }
+
+    /* Quality */
+    .quality-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .quality-card {
+      background: white;
+      border: 1px solid var(--warm);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .quality-title {
+      font-weight: 500;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .q-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .q-dot.ok   { background: var(--sage); }
+    .q-dot.warn { background: #C9A227; }
+    .q-dot.bad  { background: var(--error); }
+
+    .quality-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--cream);
+      color: #6B5F55;
+    }
+
+    .quality-row:last-child { border-bottom: none; }
+    .quality-row strong { color: var(--ink); font-weight: 500; }
+
+    /* Table */
+    .table-section { padding: 2.5rem 2.5rem 3rem; }
+
+    .t-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th {
+      text-align: left;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--dust);
+      font-weight: 500;
+      padding: 0.6rem 1rem;
+      border-bottom: 1.5px solid var(--ink);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--cream);
+      color: var(--ink);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: #fdfcfa; }
+
+    .t-chip {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 100px;
+    }
+
+    .chip-price     { background: #EBF3EB; color: var(--sage); }
+    .chip-health    { background: var(--warn-bg); color: var(--warn); }
+    .chip-lifestyle { background: #EBF3EB; color: #3d6633; }
+    .chip-compete   { background: #EEF0F8; color: #3a4888; }
+    .chip-dietary   { background: #F3EBEB; color: var(--error); }
+    .chip-incomplete{ background: var(--warm); color: var(--dust); }
+    .chip-flag      { background: #F3EBEB; color: var(--error); }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .stats-banner { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      .stat-block { border-right: none; padding: 0; }
+      .reasons-grid, .voices-grid, .persona-grid, .quality-grid { grid-template-columns: 1fr; }
+      .section, .table-section, .brand-bar { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .stats-banner { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- BRAND BAR -->
+  <header class="brand-bar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">Skout Organic × Talkback</span>
+    </div>
+    <span class="brand-meta" id="hdr-meta">Intelligence</span>
+  </header>
+
+  <!-- ── UPLOAD ── -->
+  <div id="screen-upload">
+    <h1 class="headline">What your churned customers are <em>really</em> saying.</h1>
+    <p class="subline">Upload your conversation export and get a strategic brief — root causes, real quotes, who left and why, and what to do next.</p>
+
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".csv,.tsv,.txt" />
+      <div class="drop-icon">📋</div>
+      <div class="drop-text"><strong>Drop your CSV / TSV here</strong> or click to browse</div>
+    </div>
+
+    <div class="file-confirm" id="file-confirm"></div>
+
+    <button class="btn-primary hidden" id="btn-analyse" onclick="startAnalysis()">
+      Analyse conversations
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+      </svg>
+    </button>
+
+    <p class="note">Or <a href="#" onclick="loadDemo(event)">load demo data</a> to see an example</p>
+  </div>
+
+  <!-- ── LOADING ── -->
+  <div id="screen-loading">
+    <div class="loading-headline">Reading between the lines…</div>
+    <div class="loading-sub">Analysing <span id="conv-count">0</span> completed conversations</div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="loading-steps">
+      <div class="l-step" id="ls1"><div class="l-dot"></div>Parsing transcripts</div>
+      <div class="l-step" id="ls2"><div class="l-dot"></div>Identifying real reasons behind cancellations</div>
+      <div class="l-step" id="ls3"><div class="l-dot"></div>Detecting patterns across responses</div>
+      <div class="l-step" id="ls4"><div class="l-dot"></div>Building customer archetypes</div>
+      <div class="l-step" id="ls5"><div class="l-dot"></div>Generating strategic recommendations</div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div id="screen-dash">
+
+    <div class="demo-notice" id="demo-notice">
+      👋 This is demo data from sample Skout conversations. Upload your own CSV to analyse real responses.
+    </div>
+
+    <!-- Stats banner -->
+    <div class="stats-banner">
+      <div class="stat-block">
+        <div class="stat-num sage" id="s-completed">—</div>
+        <div class="stat-label">Completed interviews</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num" id="s-total">—</div>
+        <div class="stat-label">Total sessions</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num sage" id="s-top">—</div>
+        <div class="stat-label">Top churn reason</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num" id="s-signal">—</div>
+        <div class="stat-label">Key signal</div>
+      </div>
+    </div>
+
+    <!-- Real reasons -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">The <em>real</em> reasons they left</h2>
+        <span class="section-tag">Root cause</span>
+      </div>
+      <div class="reasons-grid" id="reasons-grid"></div>
+    </section>
+
+    <!-- Voices -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">In their <em>own words</em></h2>
+        <span class="section-tag">Voice of customer</span>
+      </div>
+      <div class="voices-grid" id="voices-grid"></div>
+    </section>
+
+    <!-- Who is churning -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Who is <em>churning</em></h2>
+        <span class="section-tag">Customer archetypes</span>
+      </div>
+      <div class="persona-grid" id="persona-grid"></div>
+    </section>
+
+    <!-- What to do -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">What to <em>do about it</em></h2>
+        <span class="section-tag">Recommendations</span>
+      </div>
+      <div class="actions-list" id="actions-list"></div>
+    </section>
+
+    <!-- Data quality -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Data <em>quality</em> flags</h2>
+        <span class="section-tag">Research integrity</span>
+      </div>
+      <div class="quality-grid" id="quality-grid"></div>
+    </section>
+
+    <!-- All conversations -->
+    <div class="table-section">
+      <div class="section-header" style="margin-bottom:1.25rem">
+        <h2 class="section-title" style="font-size:1.3rem">All <em>conversations</em></h2>
+        <span class="section-tag">Raw data</span>
+      </div>
+      <div class="t-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Primary reason</th>
+              <th>Key quote</th>
+              <th>Flags</th>
+            </tr>
+          </thead>
+          <tbody id="t-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /screen-dash -->
+</div><!-- /page -->
+
+<script>
+// ── DEMO DATA ────────────────────────────────────────────────────────────────
+const DEMO = [
+  { timestamp:'2026-02-22T03:55:28Z', first_name:'Michael', last_name:'Lazar',    status:'completed', duration_secs:'128', transcript:`You: Luke.\nSkout: Who was the subscription for?\nYou: A little protein snack after the gym.\nSkout: Walk me through the moment you decided to cancel.\nYou: Just wasn't feeling it — there are better protein options for a better price.\nYou: Protein shakes are more sensible.\nSkout: Main reason you cancelled?\nYou: Price.\nSkout: Did Skout ever cross your mind after cancelling?\nYou: Yeah, they were delicious. It's like a treat but I didn't need them weekly. More affordable options solve the protein problem.\nSkout: If a neighbour asked whether to subscribe?\nYou: It depends. It's delicious, but it is a luxury.\nYou: Price.` },
+  { timestamp:'2026-02-22T04:12:49Z', first_name:'Luke',    last_name:'Yarnton',  status:'completed', duration_secs:'163', transcript:`You: Jemima.\nSkout: Who was it for?\nYou: For myself. A little afternoon treat.\nYou: Just the flavour and that it was quite healthy.\nSkout: What was the last straw?\nYou: I realised it wasn't actually as healthy as I thought.\nSkout: Main reason you cancelled?\nYou: The fact that it wasn't as healthy as I wanted.\nSkout: Did Skout cross your mind after cancelling?\nYou: I missed the taste. It was delicious. Not unhealthy, but not as healthy as I need.\nSkout: What would you warn a neighbour about?\nYou: Just the way it fits into my life.` },
+  { timestamp:'2026-02-22T04:18:36Z', first_name:'Michael', last_name:'Lazar',    status:'completed', duration_secs:'108', transcript:`You: Lisa.\nSkout: Who was it for?\nYou: For myself as a breakfast snack.\nSkout: Walk me through the moment you decided to cancel.\nYou: I cancelled because it was yum, but I just don't eat breakfast anymore.\nYou: I don't think breakfast is an important meal.\nSkout: Did Skout cross your mind?\nYou: Yeah sometimes. When I see others having breakfast I think about it.\nSkout: If a neighbour asked?\nYou: Go for it, it's delicious.\nSkout: One thing you'd warn them about?\nYou: If they change their eating plans.` },
+  { timestamp:'2026-02-22T04:22:58Z', first_name:'Joe',     last_name:'Rosenfield',status:'started',   duration_secs:'',    transcript:'' },
+  { timestamp:'2026-02-22T04:32:21Z', first_name:'Luke',    last_name:'Yarnton',  status:'started',   duration_secs:'',    transcript:'' },
+  { timestamp:'2026-02-22T07:33:48Z', first_name:'Dennis',  last_name:'Slop',     status:'completed', duration_secs:'',    transcript:`You: Dennis.\nSkout: Who was it for?\nYou: Something to have after my lunch.\nSkout: What was the last straw?\nYou: I found something else I enjoy more. It was sweeter. It's been replaced by ice cream.\nSkout: What does ice cream have that Skout was missing?\nYou: Just a little better flavour.\nSkout: Did Skout cross your mind?\nYou: Yeah, I sometimes like the fibre but I like ice cream more.\nSkout: Would you recommend to a neighbour?\nYou: It's yum, yeah buy it. But it's not as yummy as ice cream.` },
+  { timestamp:'2026-02-22T07:40:18Z', first_name:'gibs',    last_name:'Daniel',   status:'completed', duration_secs:'95',  transcript:`You: Sundeep.\nSkout: Who was it for?\nYou: For myself as a health snack.\nSkout: What was the last straw?\nYou: It wasn't the right thing for me anymore. Because it wasn't halal.\nSkout: Are you using anything else?\nYou: I'm still snacking but with halal snacks.\nSkout: Did Skout cross your mind?\nYou: Nope.\nSkout: Would you recommend to a neighbour?\nYou: Yes but it's not halal.` },
+  { timestamp:'2026-02-22T07:45:18Z', first_name:'Jane',    last_name:'Smith',    status:'completed', duration_secs:'12',  transcript:`You: Jane.\nSkout: Let's start. Who was the subscription for?` },
+];
+
+// ── CSV PARSE ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.split('\n');
+  if (lines.length < 2) return [];
+  function parseLine(line) {
+    const result = []; let cur = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
+      else if ((line[i] === '\t' || line[i] === ',') && !inQ) { result.push(cur); cur=''; }
+      else cur += line[i];
+    }
+    result.push(cur);
+    return result;
+  }
+  const hdrs = parseLine(lines[0]).map(h => h.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_'));
+  return lines.slice(1).filter(l=>l.trim()).map(l => {
+    const v = parseLine(l);
+    const o = {};
+    hdrs.forEach((h,i)=>{ o[h]=(v[i]||'').trim(); });
+    return o;
+  });
+}
+
+// ── CLASSIFY ─────────────────────────────────────────────────────────────────
+const REASON_META = {
+  price:       { label:'Price / Value',          chipClass:'chip-price',     barColor:'#4A6741', desc:'Customers loved the product but couldn\'t justify the cost against protein shakes and other alternatives. Skout is framed as a "luxury" — the first thing cut when rationalising spend.' },
+  health:      { label:'Health Expectation Gap', chipClass:'chip-health',    barColor:'#8B6914', desc:'Customers subscribed believing Skout was a high-health choice. When they scrutinised the nutritional profile, the product didn\'t meet their standard — even if it\'s genuinely nutritious by most measures.' },
+  lifestyle:   { label:'Routine Disruption',     chipClass:'chip-lifestyle', barColor:'#3d6633', desc:'Didn\'t leave out of dissatisfaction — life changed. Skout was tied to a specific routine (breakfast, post-gym) and when that routine ended, so did the subscription.' },
+  competitive: { label:'Switched to Competitor', chipClass:'chip-compete',   barColor:'#3a4888', desc:'Customers actively found and moved to alternatives that won on a specific dimension — usually taste (ice cream) or cost+function (protein shakes).' },
+  dietary:     { label:'Dietary Blocker',        chipClass:'chip-dietary',   barColor:'#9B5050', desc:'Hard-stop cancellation. A non-negotiable requirement (halal certification) wasn\'t met. No marketing or pricing change will win this customer back without a product decision.' },
+  unclear:     { label:'Insufficient Data',      chipClass:'chip-incomplete',barColor:'#C9BFB3', desc:'Conversation too short or incomplete to determine the real reason.' },
+};
+
+function classify(row) {
+  const t = (row.transcript||'').toLowerCase();
+  const reasons = [];
+  if (/price|afford|expensive|cheaper|luxury|more sensible/.test(t))           reasons.push('price');
+  if (/health|protein shake|nutrition|ingredient|as healthy/.test(t))          reasons.push('health');
+  if (/breakfast|routine|lifestyle|eating plan|don.t eat|no breakfast/.test(t)) reasons.push('lifestyle');
+  if (/ice cream|better option|protein shake|enjoy more|replaced|sweeter/.test(t)) reasons.push('competitive');
+  if (/halal|dietary|vegan|vegetarian/.test(t))                                 reasons.push('dietary');
+  if (!reasons.length) reasons.push('unclear');
+
+  const quotes = (row.transcript||'').split('\n')
+    .filter(l => /^You:/.test(l))
+    .map(l => l.replace(/^You:\s*/,'').trim())
+    .filter(q => q.length > 25 && q.length < 130 && !/^[A-Z][a-z]+\.?$/.test(q));
+
+  return { ...row, reasons, quotes };
+}
+
+function analyseData(rows) {
+  const completed = rows.filter(r => r.status==='completed' && (r.transcript||'').length > 80);
+  const classified = completed.map(classify);
+  const reasons = {};
+  classified.forEach(c => c.reasons.forEach(r => { reasons[r]=(reasons[r]||0)+1; }));
+
+  const nameFlags = rows.filter(r => {
+    if (!r.transcript) return false;
+    const m = r.transcript.match(/^You:\s*([A-Za-z]+)/m);
+    if (!m) return false;
+    return m[1].toLowerCase() !== (r.first_name||'').toLowerCase() && m[1].length > 2;
+  });
+
+  const incomplete = rows.filter(r => r.status==='started' || (r.status==='completed' && (r.transcript||'').length < 80));
+  const veryShort  = completed.filter(r => +r.duration_secs > 0 && +r.duration_secs < 30);
+
+  return { rows, completed, classified, reasons, nameFlags, incomplete, veryShort };
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render(data) {
+  const { rows, completed, classified, reasons, nameFlags, incomplete, veryShort } = data;
+
+  // Header meta
+  document.getElementById('hdr-meta').textContent = `${rows.length} sessions · ${completed.length} analysed`;
+
+  // Banner
+  const top = Object.entries(reasons).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('s-completed').textContent = completed.length;
+  document.getElementById('s-total').textContent     = rows.length;
+  document.getElementById('s-top').textContent       = top ? REASON_META[top[0]]?.label.split('/')[0].trim() : '—';
+  document.getElementById('s-signal').textContent    = reasons['price'] ? 'Treat vs Staple' : reasons['health'] ? 'Expectation Gap' : 'See below';
+
+  // Reasons
+  const rg = document.getElementById('reasons-grid');
+  rg.innerHTML = '';
+  Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([key,count]) => {
+    const m = REASON_META[key]||{ label:key, chipClass:'chip-incomplete', barColor:'#C9BFB3', desc:'' };
+    const pct = Math.round((count/completed.length)*100);
+    rg.innerHTML += `
+      <div class="reason-card">
+        <div class="reason-pct">${pct}%</div>
+        <div class="reason-name">${m.label}</div>
+        <div class="reason-desc">${m.desc}</div>
+        <div class="reason-bar"><div class="reason-bar-fill" style="width:${pct}%;background:${m.barColor}"></div></div>
+      </div>`;
+  });
+
+  // Voices
+  const vg = document.getElementById('voices-grid');
+  vg.innerHTML = '';
+  classified.flatMap(c => c.quotes.map(q=>({q,r:c.reasons[0]}))).filter(x=>x.q.length>30).slice(0,6).forEach(({q,r}) => {
+    const m = REASON_META[r]||{};
+    vg.innerHTML += `
+      <div class="voice-card">
+        <div class="voice-quote">${q}</div>
+        <span class="voice-chip">${m.label||r}</span>
+      </div>`;
+  });
+
+  // Personas
+  const pg = document.getElementById('persona-grid');
+  pg.innerHTML = '';
+  const personas = buildPersonas(classified);
+  personas.forEach(p => {
+    pg.innerHTML += `
+      <div class="persona-card">
+        <div class="persona-emoji">${p.emoji}</div>
+        <div class="persona-name">${p.name}</div>
+        <div class="persona-arch">${p.arch}</div>
+        <div class="persona-desc">${p.desc}</div>
+        <div class="persona-tags">${p.tags.map(t=>`<span class="persona-tag">${t}</span>`).join('')}</div>
+      </div>`;
+  });
+
+  // Actions
+  const al = document.getElementById('actions-list');
+  al.innerHTML = '';
+  buildActions(data).forEach((a,i) => {
+    al.innerHTML += `
+      <div class="action-row">
+        <div class="action-num">0${i+1}</div>
+        <div>
+          <div class="action-title">${a.title}</div>
+          <div class="action-desc">${a.desc}</div>
+        </div>
+        <span class="impact-chip impact-${a.impact}">${a.impact}</span>
+      </div>`;
+  });
+
+  // Quality
+  const qg = document.getElementById('quality-grid');
+  qg.innerHTML = `
+    <div class="quality-card">
+      <div class="quality-title"><div class="q-dot ${nameFlags.length?'bad':'ok'}"></div>Identity flags</div>
+      <div class="quality-row"><span>Name mismatches detected</span><strong>${nameFlags.length}</strong></div>
+      <div class="quality-row"><span>Sessions started, not completed</span><strong>${incomplete.length}</strong></div>
+      <div class="quality-row"><span>Very short completions (&lt;30s)</span><strong>${veryShort.length}</strong></div>
+    </div>
+    <div class="quality-card">
+      <div class="quality-title"><div class="q-dot warn"></div>Coverage</div>
+      <div class="quality-row"><span>Completion rate</span><strong>${Math.round((completed.length/rows.length)*100)}%</strong></div>
+      <div class="quality-row"><span>Interviews with clear signal</span><strong>${classified.filter(c=>!c.reasons.includes('unclear')).length} / ${completed.length}</strong></div>
+      <div class="quality-row"><span>Hard dietary blockers flagged</span><strong>${reasons['dietary']||0}</strong></div>
+    </div>`;
+
+  // Table
+  const tb = document.getElementById('t-body');
+  tb.innerHTML = '';
+  [...classified, ...incomplete.map(r=>({...r,reasons:['unclear'],quotes:[]}))].forEach(r => {
+    const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '—';
+    const dur  = r.duration_secs ? `${r.duration_secs}s` : '—';
+    const rKey = r.reasons?.[0]||'unclear';
+    const m    = REASON_META[rKey]||{label:rKey,chipClass:'chip-incomplete'};
+    const q    = r.quotes?.[0] ? `"${r.quotes[0].slice(0,80)}${r.quotes[0].length>80?'…':''}"` : '—';
+    const isFlagged = nameFlags.find(f=>f.first_name===r.first_name && f.timestamp===r.timestamp);
+    tb.innerHTML += `<tr>
+      <td>${r.first_name||''} ${r.last_name||''}</td>
+      <td>${date}</td>
+      <td>${dur}</td>
+      <td><span class="t-chip ${r.status==='completed'?'chip-lifestyle':'chip-incomplete'}">${r.status||'—'}</span></td>
+      <td><span class="t-chip ${m.chipClass}">${m.label}</span></td>
+      <td style="color:#6B5F55;font-style:italic;max-width:260px">${q}</td>
+      <td>${isFlagged?'<span class="t-chip chip-flag">Name mismatch</span>':''}</td>
+    </tr>`;
+  });
+}
+
+function buildPersonas(classified) {
+  const p = [];
+  const g = k => classified.filter(c=>c.reasons.includes(k));
+  if (g('price').length)       p.push({ emoji:'💸', name:'The Value Hunter',    arch:`${g('price').length} of ${classified.length} churners`,       desc:'Loved the product but couldn\'t reconcile the price with protein shakes. Views Skout as a "luxury" — the first thing cut when rationalising spending.',                                       tags:['Price-sensitive','Gym-goer','Comparison shopper','Protein-aware'] });
+  if (g('health').length)      p.push({ emoji:'🥗', name:'The Wellness Purist', arch:`${g('health').length} of ${classified.length} churners`,      desc:'Subscribed believing Skout was a clean-health choice. When they scrutinised the label the product didn\'t match expectations — even if it\'s genuinely nutritious.',                    tags:['Health-focused','Label reader','Afternoon snacker','High standards'] });
+  if (g('lifestyle').length)   p.push({ emoji:'🔄', name:'The Routine Changer', arch:`${g('lifestyle').length} of ${classified.length} churners`,   desc:'Didn\'t leave because of dissatisfaction — life changed. Skout was tied to breakfast or post-gym and when that routine ended, so did the sub. Still remembers Skout fondly.',    tags:['Routine-dependent','No bad experience','Re-subscribable','Positively recalled'] });
+  if (g('competitive').length) p.push({ emoji:'🍦', name:'The Upgrade Seeker',  arch:`${g('competitive').length} of ${classified.length} churners`, desc:'Actively found an alternative that won on taste or price. Recommends Skout to others but chose something else for themselves. Skout competes with indulgences, not supplements.',   tags:['Taste-driven','Still an advocate','Competes with ice cream','Exploratory'] });
+  if (g('dietary').length)     p.push({ emoji:'🕌', name:'The Dietary Blocker', arch:`${g('dietary').length} of ${classified.length} churners`,     desc:'A hard-stop non-negotiable. No price change or marketing will win this customer back without a product decision. Represents an underserved but highly loyal segment if addressed.', tags:['Halal required','Non-negotiable','Product gap','Underserved'] });
+  return p.slice(0,4);
+}
+
+function buildActions(data) {
+  const { reasons } = data;
+  const a = [];
+  if (reasons['price'])       a.push({ title:'Reframe Skout\'s value proposition — from "snack" to "ritual"',               impact:'high', desc:'Customers benchmark Skout against protein shakes on a per-serve basis — and Skout loses. The fix isn\'t to lower the price, it\'s to shift the frame. Position Skout as a deliberate daily ritual with a flavour and experience you can\'t get from a shake. Make the comparison irrelevant.' });
+  if (reasons['health'])      a.push({ title:'Get ahead of the health expectation gap with radical nutritional transparency', impact:'high', desc:'Multiple customers cancelled when they "realised it wasn\'t as healthy as they thought." This is a perception problem, not a product problem. Add a direct callout in onboarding and packaging that sets honest expectations — what Skout is great for nutritionally, and what it isn\'t.' });
+  if (reasons['lifestyle'])   a.push({ title:'Build a pause / snooze flow — don\'t let routine changes become permanent cancellations', impact:'high', desc:'Lifestyle churners liked the product and remember it fondly. They cancelled because cancelling was the only option. A simple delivery pause or "snooze for 4 weeks" would retain a meaningful portion of this cohort without any product change.' });
+  if (reasons['competitive']) a.push({ title:'Directly address the ice cream and protein shake comparison in marketing',      impact:'med',  desc:'Customers are explicitly comparing Skout to ice cream (flavour) and protein shakes (cost + function). Name these comparisons and own the middle ground: more flavourful than a shake, more functional than ice cream. This is Skout\'s genuine positioning.' });
+  if (reasons['dietary'])     a.push({ title:'Evaluate a halal-certified SKU or communicate certification status clearly',    impact:'med',  desc:'At least one churner left solely due to halal requirements. This is an addressable product gap in a large and highly loyal segment. If certification is achievable, it eliminates this churn category entirely.' });
+  a.push({ title:'Run a win-back campaign targeting routine changers at 60–90 days post-cancellation', impact:'med', desc:'Customers who cancelled due to lifestyle changes — not dissatisfaction — are the highest-probability re-subscribers. They miss the product. A targeted email at 60–90 days post-cancellation with a "welcome back" offer would likely convert meaningfully.' });
+  return a;
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────────────────────
+let parsedRows = null;
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const btnAnalyse = document.getElementById('btn-analyse');
+const fileConfirm = document.getElementById('file-confirm');
+
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = parseCSV(e.target.result);
+    if (rows.length > 0) {
+      parsedRows = rows;
+      fileConfirm.textContent = `✓ ${file.name} — ${rows.length} rows found`;
+      btnAnalyse.classList.remove('hidden');
+    } else {
+      fileConfirm.textContent = '⚠ Couldn\'t parse file — check it\'s a TSV or CSV export';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function loadDemo(e) {
+  e.preventDefault();
+  parsedRows = DEMO;
+  document.getElementById('demo-notice').classList.add('visible');
+  startAnalysis();
+}
+
+function startAnalysis() {
+  document.getElementById('screen-upload').style.display = 'none';
+  document.getElementById('screen-loading').classList.add('active');
+  document.getElementById('conv-count').textContent = (parsedRows||[]).filter(r=>r.status==='completed').length;
+
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  const fill  = document.getElementById('prog-fill');
+  let i = 0;
+
+  function tick() {
+    if (i > 0) {
+      document.getElementById(steps[i-1]).classList.remove('active');
+      document.getElementById(steps[i-1]).classList.add('done');
+    }
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.add('active');
+      fill.style.width = `${((i+1)/steps.length)*100}%`;
+      i++;
+      setTimeout(tick, 550 + Math.random()*350);
+    } else {
+      fill.style.width = '100%';
+      setTimeout(() => {
+        document.getElementById('screen-loading').classList.remove('active');
+        const data = analyseData(parsedRows||DEMO);
+        render(data);
+        document.getElementById('screen-dash').classList.add('active');
+      }, 400);
+    }
+  }
+  tick();
+}
+</script>
+</body>
+</html>
