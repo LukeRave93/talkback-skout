@@ -76,9 +76,7 @@
     .state { display: none; }
     .state.active { display: block; }
 
-    /* ─────────────────────────────────────
-       FORM
-    ───────────────────────────────────── */
+    /* ── FORM ── */
     #state-form { opacity: 0; animation: rise 0.7s ease 0.15s forwards; }
 
     .headline {
@@ -102,9 +100,7 @@
     }
 
     .fields { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; text-align: left; }
-
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
-
     .field { display: flex; flex-direction: column; gap: 0.35rem; }
 
     .field label {
@@ -163,12 +159,9 @@
 
     .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
 
-    /* ─────────────────────────────────────
-       ACTIVE CONVERSATION
-    ───────────────────────────────────── */
+    /* ── ACTIVE ── */
     #state-active { opacity: 0; animation: rise 0.5s ease forwards; }
 
-    /* Mic / pulse */
     .mic-wrap {
       width: 96px; height: 96px;
       margin: 0 auto 2rem;
@@ -186,10 +179,11 @@
     }
 
     .ring-1 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite; }
-    .ring-2 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 0.6s; }
-    .ring-3 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 1.2s; }
+    .ring-2 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 0.8s; }
+    .ring-3 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 1.6s; }
 
-    /* Mic button gets bigger when agent is speaking */
+    .mic-wrap.agent-speaking .ring { background: var(--ink); }
+
     .mic-btn {
       width: 56px; height: 56px;
       border-radius: 50%;
@@ -201,20 +195,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s ease, background 0.2s ease;
+      transition: background 0.2s ease;
       outline: none;
     }
 
     .mic-btn:hover { background: #3a5433; }
     .mic-btn.muted { background: #8A7D74; }
     .mic-btn svg { color: white; pointer-events: none; }
-
-    /* Agent speaking indicator */
-    .mic-wrap.agent-speaking .ring-1,
-    .mic-wrap.agent-speaking .ring-2,
-    .mic-wrap.agent-speaking .ring-3 {
-      background: var(--ink);
-    }
 
     .status-label {
       font-size: 0.75rem;
@@ -223,21 +210,14 @@
       color: var(--sage);
       font-weight: 500;
       margin-bottom: 0.6rem;
-      min-height: 1em;
       transition: color 0.3s ease;
     }
 
     .status-label.speaking { color: var(--ink); }
 
-    .active-headline {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
+    .active-headline { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
     .active-name { color: var(--sage); }
 
-    /* Live transcript */
     .transcript-wrap {
       margin-top: 1.75rem;
       text-align: left;
@@ -247,29 +227,20 @@
     }
 
     .transcript-wrap::-webkit-scrollbar { width: 3px; }
-    .transcript-wrap::-webkit-scrollbar-track { background: transparent; }
     .transcript-wrap::-webkit-scrollbar-thumb { background: var(--dust); border-radius: 2px; }
 
     .transcript-line {
       font-size: 0.82rem;
       line-height: 1.6;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
       opacity: 0;
       animation: rise 0.3s ease forwards;
       padding-left: 0.75rem;
       border-left: 2px solid transparent;
     }
 
-    .transcript-line.agent {
-      color: var(--ink);
-      border-left-color: var(--sage);
-      font-weight: 400;
-    }
-
-    .transcript-line.user {
-      color: #6B5F55;
-      border-left-color: var(--dust);
-    }
+    .transcript-line.agent { color: var(--ink); border-left-color: var(--sage); font-weight: 400; }
+    .transcript-line.user  { color: #6B5F55;    border-left-color: var(--dust); }
 
     .transcript-speaker {
       font-size: 0.65rem;
@@ -282,7 +253,6 @@
     .agent .transcript-speaker { color: var(--sage); }
     .user  .transcript-speaker { color: var(--dust); }
 
-    /* End call */
     .btn-end {
       margin-top: 2rem;
       background: none;
@@ -299,9 +269,7 @@
 
     .btn-end:hover { border-color: var(--error); color: var(--error); }
 
-    /* ─────────────────────────────────────
-       DONE
-    ───────────────────────────────────── */
+    /* ── DONE ── */
     #state-done { opacity: 0; animation: rise 0.5s ease forwards; }
 
     .checkmark {
@@ -315,14 +283,10 @@
     }
 
     .checkmark svg { color: white; }
-
     .done-headline { font-family: 'DM Serif Display', serif; font-size: 1.75rem; margin-bottom: 0.75rem; }
     .done-sub { font-size: 0.95rem; color: #6B5F55; line-height: 1.65; }
     .divider { width: 32px; height: 1px; background: var(--dust); margin: 2rem auto; }
 
-    /* ─────────────────────────────────────
-       ANIMATIONS
-    ───────────────────────────────────── */
     @keyframes rise {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -354,7 +318,7 @@
     <span class="brand-name">Skout Organic × TalkBack</span>
   </div>
 
-  <!-- ── STEP 1: Form ── -->
+  <!-- STEP 1: Form -->
   <div id="state-form" class="state active">
     <h1 class="headline">Tell us why you <em>left.</em></h1>
     <p class="subline">Two minutes, no typing — just a quick voice conversation. We'll send you something for your time.</p>
@@ -388,21 +352,19 @@
     <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
   </div>
 
-  <!-- ── STEP 2: Active ── -->
+  <!-- STEP 2: Active -->
   <div id="state-active" class="state">
     <div class="mic-wrap" id="mic-wrap">
       <div class="ring ring-1"></div>
       <div class="ring ring-2"></div>
       <div class="ring ring-3"></div>
       <button class="mic-btn" id="btn-mute" title="Mute / unmute">
-        <!-- mic icon -->
         <svg id="icon-mic" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/>
           <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/>
           <line x1="8"  y1="23" x2="16" y2="23" stroke-linecap="round"/>
         </svg>
-        <!-- muted icon -->
         <svg id="icon-muted" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" opacity="0.4"/>
           <line x1="1" y1="1" x2="23" y2="23" stroke-linecap="round"/>
@@ -410,15 +372,14 @@
       </button>
     </div>
 
-    <p class="status-label" id="status-label">Listening</p>
+    <p class="status-label" id="status-label">Connecting…</p>
     <h2 class="active-headline">We're all ears, <span class="active-name" id="active-name"></span></h2>
 
     <div class="transcript-wrap" id="transcript"></div>
-
     <button class="btn-end" id="btn-end">End conversation</button>
   </div>
 
-  <!-- ── STEP 3: Done ── -->
+  <!-- STEP 3: Done -->
   <div id="state-done" class="state">
     <div class="checkmark">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -436,51 +397,33 @@
 
 <!--
 ═══════════════════════════════════════════════════════════════
-GOOGLE SHEETS SETUP — one time
+GOOGLE SHEETS SETUP — one time only
 ═══════════════════════════════════════════════════════════════
 
-1. Create a Google Sheet with these headers in Row 1:
-   A: Timestamp
-   B: First Name
-   C: Last Name
-   D: Email
-   E: Session ID
-   F: Page URL
-   G: Device
-   H: Browser
-   I: ElevenLabs Conversation ID
-   J: Duration (seconds)
-   K: Status
-   L: Transcript
+1. Create a Google Sheet. Add these headers in Row 1:
+   A: Timestamp  B: First Name  C: Last Name  D: Email
+   E: Session ID  F: Page URL  G: Device  H: Browser
+   I: EL Conversation ID  J: Duration (secs)  K: Status  L: Transcript
 
-2. Extensions → Apps Script → delete existing code → paste:
+2. Extensions → Apps Script → delete existing code → paste this:
 
-───────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────
 function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data  = JSON.parse(e.postData.contents);
 
   if (data.action === 'register') {
     sheet.appendRow([
-      data.timestamp,
-      data.firstName,
-      data.lastName,
-      data.email,
-      data.sessionId,
-      data.pageUrl,
-      data.device,
-      data.browser,
-      '',
-      '',
-      'started',
-      ''
+      data.timestamp, data.firstName, data.lastName, data.email,
+      data.sessionId, data.pageUrl, data.device, data.browser,
+      '', '', 'started', ''
     ]);
   }
 
   if (data.action === 'complete') {
-    var values = sheet.getDataRange().getValues();
-    for (var i = 1; i < values.length; i++) {
-      if (values[i][4] === data.sessionId) {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][4] === data.sessionId) {
         sheet.getRange(i+1, 9).setValue(data.conversationId || '');
         sheet.getRange(i+1, 10).setValue(data.duration      || '');
         sheet.getRange(i+1, 11).setValue('completed');
@@ -494,238 +437,222 @@ function doPost(e) {
     .createTextOutput(JSON.stringify({ success: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }
-───────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────
 
 3. Deploy → New deployment → Web app
-   Execute as: Me  |  Who has access: Anyone
+   Execute as: Me | Who has access: Anyone
    Copy the Web App URL → paste as SHEETS_ENDPOINT below
 
 ═══════════════════════════════════════════════════════════════
 -->
 
-<!-- ElevenLabs Conversational AI SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@11labs/client@latest/dist/index.umd.js"></script>
+<script type="module">
+  // ── ElevenLabs SDK via ESM (correct import) ────────────────────────
+  import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@latest/+esm';
 
-<script>
-// ── Config ──────────────────────────────────────────────────────────
-const AGENT_ID        = 'agent_1001kh4fjj6hfdkv25v56yeksgzc';
-const SHEETS_ENDPOINT = 'YOUR_APPS_SCRIPT_URL'; // ← paste your Google Apps Script URL here
+  // ── Config ─────────────────────────────────────────────────────────
+  const AGENT_ID        = 'agent_1001kh4fjj6hfdkv25v56yeksgzc';
+  const SHEETS_ENDPOINT = 'YOUR_APPS_SCRIPT_URL'; // ← paste Google Apps Script URL here
 
-// ── State ────────────────────────────────────────────────────────────
-let customer     = {};
-let conversation = null;  // ElevenLabs SDK instance
-let startTime    = null;
-let isMuted      = false;
-let fullTranscript = [];
+  // ── State ───────────────────────────────────────────────────────────
+  let customer       = {};
+  let conversation   = null;
+  let startTime      = null;
+  let isMuted        = false;
+  let fullTranscript = [];
 
-const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-// ── Detect device / browser ──────────────────────────────────────────
-function getDevice() {
-  return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
-}
+  function getDevice()  { return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop'; }
+  function getBrowser() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Chrome') && !ua.includes('Edg'))   return 'Chrome';
+    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg'))     return 'Edge';
+    return 'Other';
+  }
 
-function getBrowser() {
-  const ua = navigator.userAgent;
-  if (ua.includes('Chrome') && !ua.includes('Edg'))  return 'Chrome';
-  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-  if (ua.includes('Firefox')) return 'Firefox';
-  if (ua.includes('Edg'))     return 'Edge';
-  return 'Other';
-}
+  function show(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    const el = $('state-' + name);
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+    el.classList.add('active');
+  }
 
-// ── Show state ───────────────────────────────────────────────────────
-function show(name) {
-  document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
-  const el = $('state-' + name);
-  el.style.animation = 'none';
-  el.offsetHeight;
-  el.style.animation = '';
-  el.classList.add('active');
-}
+  function validate() {
+    let ok    = true;
+    const first = $('f-first').value.trim();
+    const last  = $('f-last').value.trim();
+    const email = $('f-email').value.trim();
 
-// ── Validation ───────────────────────────────────────────────────────
-function validate() {
-  let ok    = true;
-  const first = $('f-first').value.trim();
-  const last  = $('f-last').value.trim();
-  const email = $('f-email').value.trim();
-
-  [['f-first','e-first', !first],
-   ['f-last', 'e-last',  !last],
-   ['f-email','e-email',  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)]
-  ].forEach(([inp, err, bad]) => {
-    $(inp).classList.toggle('invalid', bad);
-    $(err).classList.toggle('visible', bad);
-    if (bad) ok = false;
-  });
-
-  return ok ? { first, last, email } : null;
-}
-
-// ── Transcript helper ────────────────────────────────────────────────
-function appendTranscript(role, text) {
-  const wrap = $('transcript');
-  const line = document.createElement('div');
-  line.className = 'transcript-line ' + role;
-  line.innerHTML = `<div class="transcript-speaker">${role === 'agent' ? 'Skout' : 'You'}</div>${text}`;
-  wrap.appendChild(line);
-  wrap.scrollTop = wrap.scrollHeight;
-  fullTranscript.push({ role, text });
-}
-
-// ── Sheets write ─────────────────────────────────────────────────────
-async function sheetsWrite(payload) {
-  if (SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_URL') return; // skip if not configured
-  try {
-    await fetch(SHEETS_ENDPOINT, {
-      method:  'POST',
-      mode:    'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload)
+    [['f-first','e-first', !first],
+     ['f-last', 'e-last',  !last],
+     ['f-email','e-email',  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)]
+    ].forEach(([inp, err, bad]) => {
+      $(inp).classList.toggle('invalid', bad);
+      $(err).classList.toggle('visible', bad);
+      if (bad) ok = false;
     });
-  } catch (err) {
-    console.warn('Sheets write failed:', err);
+
+    return ok ? { first, last, email } : null;
   }
-}
 
-// ── Start button ─────────────────────────────────────────────────────
-$('btn-start').addEventListener('click', async () => {
-  const data = validate();
-  if (!data) return;
+  function appendTranscript(role, text) {
+    const wrap = $('transcript');
+    const line = document.createElement('div');
+    line.className = 'transcript-line ' + role;
+    line.innerHTML = `<div class="transcript-speaker">${role === 'agent' ? 'Skout' : 'You'}</div>${text}`;
+    wrap.appendChild(line);
+    wrap.scrollTop = wrap.scrollHeight;
+    fullTranscript.push({ role, text });
+  }
 
-  const btn = $('btn-start');
-  btn.disabled    = true;
-  btn.textContent = 'Starting…';
+  async function sheetsWrite(payload) {
+    if (SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_URL') return;
+    try {
+      await fetch(SHEETS_ENDPOINT, {
+        method:  'POST',
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.warn('Sheets write failed:', err);
+    }
+  }
 
-  customer = {
-    firstName: data.first,
-    lastName:  data.last,
-    email:     data.email,
-    sessionId: 'tb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-    pageUrl:   window.location.href,
-    device:    getDevice(),
-    browser:   getBrowser(),
-    timestamp: new Date().toISOString(),
-  };
+  // ── Start button ────────────────────────────────────────────────────
+  $('btn-start').addEventListener('click', async () => {
+    const data = validate();
+    if (!data) return;
 
-  // Write opening row to Sheets
-  await sheetsWrite({
-    action:    'register',
-    timestamp: customer.timestamp,
-    firstName: customer.firstName,
-    lastName:  customer.lastName,
-    email:     customer.email,
-    sessionId: customer.sessionId,
-    pageUrl:   customer.pageUrl,
-    device:    customer.device,
-    browser:   customer.browser,
+    const btn = $('btn-start');
+    btn.disabled    = true;
+    btn.textContent = 'Starting…';
+
+    customer = {
+      firstName: data.first,
+      lastName:  data.last,
+      email:     data.email,
+      sessionId: 'tb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      pageUrl:   window.location.href,
+      device:    getDevice(),
+      browser:   getBrowser(),
+      timestamp: new Date().toISOString(),
+    };
+
+    await sheetsWrite({
+      action:    'register',
+      timestamp: customer.timestamp,
+      firstName: customer.firstName,
+      lastName:  customer.lastName,
+      email:     customer.email,
+      sessionId: customer.sessionId,
+      pageUrl:   customer.pageUrl,
+      device:    customer.device,
+      browser:   customer.browser,
+    });
+
+    $('active-name').textContent = customer.firstName + '.';
+    show('active');
+    startConversation();
   });
 
-  // Update active screen with first name
-  $('active-name').textContent = customer.firstName + '.';
+  // ── ElevenLabs SDK ──────────────────────────────────────────────────
+  async function startConversation() {
+    startTime = Date.now();
 
-  show('active');
-  startConversation();
-});
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      $('status-label').textContent = 'Microphone access needed';
+      console.error('Mic permission denied', err);
+      return;
+    }
 
-// ── ElevenLabs SDK conversation ──────────────────────────────────────
-async function startConversation() {
-  startTime = Date.now();
+    try {
+      conversation = await Conversation.startSession({
+        agentId: AGENT_ID,
 
-  // Request mic permission
-  try {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch (err) {
-    console.error('Mic permission denied', err);
-    $('status-label').textContent = 'Microphone access needed';
-    return;
-  }
+        dynamicVariables: {
+          customer_first_name: customer.firstName,
+          customer_last_name:  customer.lastName,
+          customer_email:      customer.email,
+          session_id:          customer.sessionId,
+        },
 
-  // Initialise ElevenLabs SDK
-  // ElevenLabsClient is exposed as window.ElevenLabs from the UMD build
-  const EL = window.ElevenLabs || window['@11labs/client'];
+        onConnect: () => {
+          $('status-label').textContent = 'Listening';
+        },
 
-  conversation = await EL.Conversation.startSession({
-    agentId: AGENT_ID,
+        onMessage: ({ source, message }) => {
+          // source is 'ai' or 'user'
+          const role = source === 'ai' ? 'agent' : 'user';
+          appendTranscript(role, message);
+        },
 
-    // Pass customer data as dynamic variables into the agent
-    dynamicVariables: {
-      customer_first_name: customer.firstName,
-      customer_last_name:  customer.lastName,
-      customer_email:      customer.email,
-      session_id:          customer.sessionId,
-    },
+        onModeChange: ({ mode }) => {
+          const wrap  = $('mic-wrap');
+          const label = $('status-label');
+          if (mode === 'speaking') {
+            wrap.classList.add('agent-speaking');
+            label.textContent = 'Skout is speaking…';
+            label.classList.add('speaking');
+          } else {
+            wrap.classList.remove('agent-speaking');
+            label.textContent = isMuted ? 'Muted' : 'Listening';
+            label.classList.remove('speaking');
+          }
+        },
 
-    // Agent starts speaking
-    onConnect: () => {
-      $('status-label').textContent = 'Connected';
-    },
+        onDisconnect: async () => {
+          const duration = Math.round((Date.now() - startTime) / 1000);
+          const transcript = fullTranscript
+            .map(t => `${t.role === 'agent' ? 'Skout' : 'You'}: ${t.text}`)
+            .join('\n');
 
-    // Called whenever agent or user speaks
-    onMessage: ({ role, message }) => {
-      appendTranscript(role, message);
-    },
+          await sheetsWrite({
+            action:         'complete',
+            sessionId:      customer.sessionId,
+            conversationId: conversation?.getId?.() || '',
+            duration,
+            transcript,
+          });
 
-    // Agent speaking state — animate mic ring differently
-    onModeChange: ({ mode }) => {
-      const micWrap = $('mic-wrap');
-      const label   = $('status-label');
-      if (mode === 'speaking') {
-        micWrap.classList.add('agent-speaking');
-        label.textContent = 'Skout is speaking…';
-        label.classList.add('speaking');
-      } else {
-        micWrap.classList.remove('agent-speaking');
-        label.textContent = isMuted ? 'Muted' : 'Listening';
-        label.classList.remove('speaking');
-      }
-    },
+          show('done');
+        },
 
-    // Conversation ended (agent or user)
-    onDisconnect: async () => {
-      const duration       = Math.round((Date.now() - startTime) / 1000);
-      const transcriptText = fullTranscript
-        .map(t => `${t.role === 'agent' ? 'Skout' : 'You'}: ${t.text}`)
-        .join('\n');
-      const conversationId = conversation?.conversationId || '';
-
-      await sheetsWrite({
-        action:         'complete',
-        sessionId:      customer.sessionId,
-        conversationId: conversationId,
-        duration:       duration,
-        transcript:     transcriptText,
+        onError: (msg) => {
+          console.error('ElevenLabs error:', msg);
+          $('status-label').textContent = 'Connection error — please refresh';
+        },
       });
 
-      show('done');
-    },
-
-    onError: (err) => {
-      console.error('ElevenLabs error', err);
-      $('status-label').textContent = 'Connection error — please refresh';
-    },
-  });
-}
-
-// ── Mute button ──────────────────────────────────────────────────────
-$('btn-mute').addEventListener('click', () => {
-  if (!conversation) return;
-  isMuted = !isMuted;
-  conversation.setMicMuted(isMuted);
-  $('btn-mute').classList.toggle('muted', isMuted);
-  $('icon-mic').style.display   = isMuted ? 'none'  : 'block';
-  $('icon-muted').style.display = isMuted ? 'block' : 'none';
-  $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
-});
-
-// ── End call button ──────────────────────────────────────────────────
-$('btn-end').addEventListener('click', async () => {
-  if (conversation) {
-    await conversation.endSession();
+    } catch (err) {
+      console.error('Failed to start session:', err);
+      $('status-label').textContent = 'Could not connect — please refresh';
+    }
   }
-  // onDisconnect will fire and handle the rest
-});
+
+  // ── Mute ────────────────────────────────────────────────────────────
+  $('btn-mute').addEventListener('click', () => {
+    if (!conversation) return;
+    isMuted = !isMuted;
+    conversation.setMicMuted(isMuted);
+    $('btn-mute').classList.toggle('muted', isMuted);
+    $('icon-mic').style.display   = isMuted ? 'none'  : 'block';
+    $('icon-muted').style.display = isMuted ? 'block' : 'none';
+    $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
+  });
+
+  // ── End ─────────────────────────────────────────────────────────────
+  $('btn-end').addEventListener('click', async () => {
+    if (conversation) await conversation.endSession();
+  });
+
 </script>
 
 </body>
