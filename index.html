@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TalkBack — Skout Organic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F7F3EE;
+      --ink:   #1A1612;
+      --sage:  #4A6741;
+      --dust:  #C9BFB3;
+      --warm:  #E8DDD4;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Subtle grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Logo / Brand mark */
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 3.5rem;
+      opacity: 0;
+      animation: rise 0.7s ease forwards;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+    }
+
+    .brand-name {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 500;
+    }
+
+    /* State views */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* --- IDLE --- */
+    #state-idle {
+      opacity: 0;
+      animation: rise 0.7s ease 0.15s forwards;
+    }
+
+    .headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 6vw, 2.75rem);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+      color: var(--ink);
+    }
+
+    .headline em {
+      font-style: italic;
+      color: var(--sage);
+    }
+
+    .subline {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: #6B5F55;
+      margin-bottom: 2.75rem;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-start {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      border-radius: 100px;
+      padding: 1rem 2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+      outline: none;
+    }
+
+    .btn-start:hover { background: var(--sage); transform: translateY(-1px); }
+    .btn-start:active { transform: translateY(0); }
+
+    .btn-start svg { transition: transform 0.2s ease; }
+    .btn-start:hover svg { transform: translateX(2px); }
+
+    .note {
+      margin-top: 1.5rem;
+      font-size: 0.78rem;
+      color: var(--dust);
+      letter-spacing: 0.01em;
+    }
+
+    /* --- ACTIVE --- */
+    #state-active {
+      opacity: 0;
+      animation: rise 0.5s ease forwards;
+    }
+
+    .pulse-ring {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 2rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pulse-ring::before,
+    .pulse-ring::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: var(--sage);
+    }
+
+    .pulse-ring::before {
+      width: 80px; height: 80px;
+      opacity: 0.12;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-ring::after {
+      width: 48px; height: 48px;
+      opacity: 0.2;
+      animation: pulse 2s ease-in-out infinite 0.4s;
+    }
+
+    .mic-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--sage);
+      position: relative;
+      z-index: 1;
+    }
+
+    .listening-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .active-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .active-sub {
+      font-size: 0.9rem;
+      color: #6B5F55;
+      line-height: 1.6;
+    }
+
+    /* ElevenLabs widget container */
+    #el-widget {
+      margin-top: 2rem;
+    }
+
+    /* --- DONE --- */
+    #state-done {
+      opacity: 0;
+      animation: rise 0.5s ease forwards;
+    }
+
+    .checkmark {
+      width: 52px;
+      height: 52px;
+      background: var(--sage);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+    }
+
+    .checkmark svg { color: white; }
+
+    .done-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .done-sub {
+      font-size: 0.95rem;
+      color: #6B5F55;
+      line-height: 1.65;
+    }
+
+    /* Divider */
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: var(--dust);
+      margin: 2.5rem auto;
+    }
+
+    /* Error */
+    #state-error { opacity: 0; animation: rise 0.5s ease forwards; }
+    .error-text { font-size: 0.9rem; color: #9B5050; line-height: 1.6; }
+
+    /* Animations */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.15; }
+      50%       { transform: scale(1.5); opacity: 0.05; }
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--dust);
+      letter-spacing: 0.05em;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">Skout Organic × TalkBack</span>
+    </div>
+
+    <!-- IDLE: Before conversation starts -->
+    <div id="state-idle" class="state active">
+      <h1 class="headline">Tell us why you <em>left.</em></h1>
+      <p class="subline">
+        Two minutes. No forms. Just a quick voice conversation — and we'll send you something for your time.
+      </p>
+      <button class="btn-start" id="btn-start">
+        Start talking
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </button>
+      <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
+    </div>
+
+    <!-- ACTIVE: Conversation in progress -->
+    <div id="state-active" class="state">
+      <div class="pulse-ring">
+        <div class="mic-dot"></div>
+      </div>
+      <p class="listening-label">Listening</p>
+      <h2 class="active-headline">We're all ears.</h2>
+      <p class="active-sub">Speak naturally — there are no wrong answers.</p>
+      <div id="el-widget"></div>
+    </div>
+
+    <!-- DONE: Conversation complete -->
+    <div id="state-done" class="state">
+      <div class="checkmark">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h2 class="done-headline">Thank you.</h2>
+      <div class="divider"></div>
+      <p class="done-sub">
+        Your reward is on its way — check your inbox in the next few minutes.
+      </p>
+    </div>
+
+    <!-- ERROR: Missing customer ID -->
+    <div id="state-error" class="state">
+      <h2 class="done-headline">Link expired.</h2>
+      <div class="divider"></div>
+      <p class="error-text">
+        This link isn't valid. If you received an email from Skout Organic, please use the button directly from that email.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="footer">ravemarketing.co</div>
+
+  <!--
+    =====================================================================
+    ENGINEER NOTES
+    =====================================================================
+
+    1. CUSTOMER ID
+       Reads `cid` from URL: ?cid=KLAVIYO_PROFILE_ID
+       Available globally as window.CUSTOMER_ID
+
+    2. ELEVENLABS WIDGET
+       Replace YOUR_AGENT_ID below with the live ElevenLabs agent ID.
+       The cid is passed as a dynamic variable named `customer_id`.
+       ElevenLabs docs: https://elevenlabs.io/docs/conversational-ai/widget
+
+    3. CONVERSATION EVENTS
+       - "conversation_started"  → switches to #state-active
+       - "conversation_ended"    → switches to #state-done
+       Both are fired by the ElevenLabs widget postMessage API.
+
+    4. WEBHOOK (server-side — not this file)
+       ElevenLabs fires POST to your endpoint on session end.
+       Payload includes: conversation_id, transcript, metadata.customer_id
+       Your endpoint then calls Klaviyo Profiles API:
+         PATCH /v2/profiles/{profile_id}
+         { "talkback_status": "completed", "talkback_transcript": "..." }
+       Then Klaviyo flow triggers reward email.
+
+    =====================================================================
+  -->
+
+  <!-- ElevenLabs Conversational AI SDK -->
+  <script src="https://elevenlabs.io/convai-widget/index.js" async></script>
+
+  <script>
+    // ── 1. Read customer ID from URL ──────────────────────────────────
+    const params     = new URLSearchParams(window.location.search);
+    const CUSTOMER_ID = params.get('cid') || '';
+
+    window.CUSTOMER_ID = CUSTOMER_ID;
+
+    // ── 2. State management ───────────────────────────────────────────
+    const states = {
+      idle:   document.getElementById('state-idle'),
+      active: document.getElementById('state-active'),
+      done:   document.getElementById('state-done'),
+      error:  document.getElementById('state-error'),
+    };
+
+    function show(name) {
+      Object.values(states).forEach(el => el.classList.remove('active'));
+      const el = states[name];
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = '';
+      el.classList.add('active');
+    }
+
+    // ── 3. Validate cid ───────────────────────────────────────────────
+    if (!CUSTOMER_ID) {
+      show('error');
+    }
+
+    // ── 4. Start button ───────────────────────────────────────────────
+    document.getElementById('btn-start')?.addEventListener('click', () => {
+      if (!CUSTOMER_ID) { show('error'); return; }
+      show('active');
+      initElevenLabs();
+    });
+
+    // ── 5. ElevenLabs widget init ─────────────────────────────────────
+    function initElevenLabs() {
+      const container = document.getElementById('el-widget');
+
+      // Create the widget element
+      // ENGINEER: replace YOUR_AGENT_ID with the real agent ID
+      const widget = document.createElement('elevenlabs-convai');
+      widget.setAttribute('agent-id', 'YOUR_AGENT_ID');
+
+      // Pass customer ID as a dynamic variable so it appears in
+      // ElevenLabs session metadata and the webhook payload
+      widget.setAttribute('dynamic-variables', JSON.stringify({
+        customer_id: CUSTOMER_ID
+      }));
+
+      container.appendChild(widget);
+
+      // ── 6. Listen for conversation lifecycle events ─────────────────
+      // ElevenLabs fires postMessage events from its iframe
+      window.addEventListener('message', (event) => {
+        // Only trust messages from ElevenLabs domains
+        if (!event.origin.includes('elevenlabs.io')) return;
+
+        const { type } = event.data || {};
+
+        if (type === 'conversation_started') {
+          // Already on active state, nothing to do
+        }
+
+        if (type === 'conversation_ended') {
+          show('done');
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
