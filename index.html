@@ -49,7 +49,7 @@
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 480px;
+      max-width: 520px;
       width: 100%;
       text-align: center;
     }
@@ -76,6 +76,7 @@
     .state { display: none; }
     .state.active { display: block; }
 
+    /* ── FORM ── */
     #state-form { opacity: 0; animation: rise 0.7s ease 0.15s forwards; }
 
     .headline {
@@ -155,9 +156,9 @@
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
     .btn-primary:hover:not(:disabled) svg { transform: translateX(2px); }
-
     .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
 
+    /* ── ACTIVE ── */
     #state-active { opacity: 0; animation: rise 0.5s ease forwards; }
 
     .mic-wrap {
@@ -174,14 +175,16 @@
       border-radius: 50%;
       background: var(--sage);
       opacity: 0;
+      width: 96px; height: 96px;
     }
 
-    .ring-1 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite; }
-    .ring-2 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 0.8s; }
-    .ring-3 { width: 96px; height: 96px; animation: ripple 2.4s ease-out infinite 1.6s; }
+    .ring-1 { animation: ripple 2.4s ease-out infinite; }
+    .ring-2 { animation: ripple 2.4s ease-out infinite 0.8s; }
+    .ring-3 { animation: ripple 2.4s ease-out infinite 1.6s; }
 
     .mic-wrap.agent-speaking .ring { background: var(--ink); }
 
+    /* The mic button — also the ending animation anchor */
     .mic-btn {
       width: 56px; height: 56px;
       border-radius: 50%;
@@ -195,11 +198,31 @@
       justify-content: center;
       transition: background 0.2s ease;
       outline: none;
+      transform-origin: center center;
     }
 
     .mic-btn:hover { background: #3a5433; }
     .mic-btn.muted { background: #8A7D74; }
     .mic-btn svg { color: white; pointer-events: none; }
+
+    /* Ending sequence — spin + expand + contract */
+    .mic-btn.ending {
+      animation: mic-farewell 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    @keyframes mic-farewell {
+      0%   { transform: scale(1)    rotate(0deg);   background: var(--sage); }
+      30%  { transform: scale(1)    rotate(180deg); background: var(--sage); }
+      60%  { transform: scale(1.5)  rotate(320deg); background: var(--sage); }
+      80%  { transform: scale(1.65) rotate(355deg); background: var(--sage); }
+      90%  { transform: scale(0.8)  rotate(360deg); background: var(--sage); }
+      100% { transform: scale(0)    rotate(360deg); background: var(--sage); opacity: 0; }
+    }
+
+    /* Rings fade out during ending */
+    .mic-wrap.ending .ring { animation: none; opacity: 0; transition: opacity 0.3s ease; }
 
     .status-label {
       font-size: 0.75rem;
@@ -208,10 +231,11 @@
       color: var(--sage);
       font-weight: 500;
       margin-bottom: 0.6rem;
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, opacity 0.3s ease;
     }
 
     .status-label.speaking { color: var(--ink); }
+    .status-label.ending   { opacity: 0; }
 
     .active-headline { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
     .active-name { color: var(--sage); }
@@ -261,28 +285,112 @@
       font-size: 0.8rem;
       color: #8A7D74;
       cursor: pointer;
-      transition: border-color 0.2s ease, color 0.2s ease;
+      transition: border-color 0.2s ease, color 0.2s ease, opacity 0.3s ease;
       outline: none;
     }
 
     .btn-end:hover { border-color: var(--error); color: var(--error); }
+    .btn-end.ending { opacity: 0; pointer-events: none; }
 
-    #state-done { opacity: 0; animation: rise 0.5s ease forwards; }
+    /* ── DONE ── */
+    #state-done { opacity: 0; animation: rise 0.6s ease forwards; }
 
-    .checkmark {
-      width: 56px; height: 56px;
-      background: var(--sage);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 2rem;
+    .done-header {
+      margin-bottom: 2rem;
     }
 
-    .checkmark svg { color: white; }
-    .done-headline { font-family: 'DM Serif Display', serif; font-size: 1.75rem; margin-bottom: 0.75rem; }
-    .done-sub { font-size: 0.95rem; color: #6B5F55; line-height: 1.65; }
+    .done-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .done-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+
+    .done-body {
+      font-size: 0.92rem;
+      color: #6B5F55;
+      line-height: 1.75;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
     .divider { width: 32px; height: 1px; background: var(--dust); margin: 2rem auto; }
+
+    /* Editable transcript */
+    .transcript-section {
+      text-align: left;
+    }
+
+    .transcript-section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #8A7D74;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .edit-hint {
+      font-size: 0.68rem;
+      color: var(--dust);
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-weight: 300;
+    }
+
+    .transcript-editable {
+      width: 100%;
+      min-height: 200px;
+      background: white;
+      border: 1px solid var(--warm);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: var(--ink);
+      font-weight: 300;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .transcript-editable:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(74,103,65,0.08);
+    }
+
+    .btn-save {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px solid var(--sage);
+      border-radius: 100px;
+      padding: 0.6rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--sage);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      outline: none;
+    }
+
+    .btn-save:hover { background: var(--sage); color: white; }
+    .btn-save.saved { background: var(--sage); color: white; pointer-events: none; }
 
     @keyframes rise {
       from { opacity: 0; transform: translateY(10px); }
@@ -349,7 +457,7 @@
     <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
   </div>
 
-  <!-- STEP 2: Active -->
+  <!-- STEP 2: Active conversation -->
   <div id="state-active" class="state">
     <div class="mic-wrap" id="mic-wrap">
       <div class="ring ring-1"></div>
@@ -378,14 +486,32 @@
 
   <!-- STEP 3: Done -->
   <div id="state-done" class="state">
-    <div class="checkmark">
-      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-      </svg>
+
+    <div class="done-header">
+      <p class="done-eyebrow">Conversation complete</p>
+      <h2 class="done-headline">Hey <span id="done-name"></span>, thanks for taking the time to speak with us.</h2>
+      <p class="done-body">
+        Our team are reviewing the conversation — this typically takes 24 hours or less.
+        We'll send your reward as soon as it's been reviewed.
+      </p>
     </div>
-    <h2 class="done-headline">Thank you.</h2>
+
     <div class="divider"></div>
-    <p class="done-sub">Your reward is on its way — check your inbox in the next few minutes.</p>
+
+    <div class="transcript-section">
+      <div class="transcript-section-label">
+        Your transcript
+        <span class="edit-hint">Feel free to edit if anything needs correcting</span>
+      </div>
+      <textarea class="transcript-editable" id="transcript-editable" placeholder="Your conversation will appear here…"></textarea>
+      <button class="btn-save" id="btn-save">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        Save edits
+      </button>
+    </div>
+
   </div>
 
 </div>
@@ -466,6 +592,7 @@
     }
   }
 
+  // ── Form submit ──────────────────────────────────────────────────────
   $('btn-start').addEventListener('click', async () => {
     const data = validate();
     if (!data) return;
@@ -502,12 +629,13 @@
     startConversation();
   });
 
+  // ── ElevenLabs SDK ───────────────────────────────────────────────────
   async function startConversation() {
     startTime = Date.now();
 
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
+    } catch {
       $('status-label').textContent = 'Microphone access needed';
       return;
     }
@@ -547,20 +675,7 @@
         },
 
         onDisconnect: async () => {
-          const duration = Math.round((Date.now() - startTime) / 1000);
-          const transcript = fullTranscript
-            .map(t => `${t.role === 'agent' ? 'Skout' : 'You'}: ${t.text}`)
-            .join('\n');
-
-          await sheetsWrite({
-            action:         'complete',
-            sessionId:      customer.sessionId,
-            conversationId: conversation?.getId?.() || '',
-            duration,
-            transcript,
-          });
-
-          show('done');
+          await triggerEndingSequence();
         },
 
         onError: (msg) => {
@@ -575,6 +690,44 @@
     }
   }
 
+  // ── End animation then transition to done screen ─────────────────────
+  async function triggerEndingSequence() {
+    const duration = Math.round((Date.now() - startTime) / 1000);
+    const transcriptText = fullTranscript
+      .map(t => `${t.role === 'agent' ? 'Skout' : 'You'}: ${t.text}`)
+      .join('\n');
+
+    // Write to Sheets in background
+    sheetsWrite({
+      action:         'complete',
+      sessionId:      customer.sessionId,
+      conversationId: conversation?.getId?.() || '',
+      duration,
+      transcript:     transcriptText,
+    });
+
+    // Trigger mic spin + expand + collapse animation
+    const micBtn  = $('btn-mute');
+    const micWrap = $('mic-wrap');
+    const label   = $('status-label');
+    const endBtn  = $('btn-end');
+
+    label.classList.add('ending');
+    endBtn.classList.add('ending');
+    micWrap.classList.add('ending');
+    micBtn.classList.add('ending');
+
+    // Wait for animation to complete (1.4s) then pop to done
+    await new Promise(r => setTimeout(r, 1400));
+
+    // Populate done screen
+    $('done-name').textContent = customer.firstName;
+    $('transcript-editable').value = transcriptText;
+
+    show('done');
+  }
+
+  // ── Mute ─────────────────────────────────────────────────────────────
   $('btn-mute').addEventListener('click', () => {
     if (!conversation) return;
     isMuted = !isMuted;
@@ -585,8 +738,36 @@
     $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
   });
 
+  // ── End call ──────────────────────────────────────────────────────────
   $('btn-end').addEventListener('click', async () => {
-    if (conversation) await conversation.endSession();
+    if (conversation) {
+      await conversation.endSession();
+      // onDisconnect fires → triggerEndingSequence
+    } else {
+      await triggerEndingSequence();
+    }
+  });
+
+  // ── Save edited transcript back to Sheets ─────────────────────────────
+  $('btn-save').addEventListener('click', async () => {
+    const edited = $('transcript-editable').value;
+    const btn    = $('btn-save');
+    btn.textContent = 'Saving…';
+
+    await sheetsWrite({
+      action:    'complete',
+      sessionId: customer.sessionId,
+      transcript: edited,
+      edited:    true,
+    });
+
+    btn.innerHTML = `
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      </svg>
+      Saved
+    `;
+    btn.classList.add('saved');
   });
 
 </script>
