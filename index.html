@@ -76,7 +76,6 @@
     .state { display: none; }
     .state.active { display: block; }
 
-    /* ── FORM ── */
     #state-form { opacity: 0; animation: rise 0.7s ease 0.15s forwards; }
 
     .headline {
@@ -159,7 +158,6 @@
 
     .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
 
-    /* ── ACTIVE ── */
     #state-active { opacity: 0; animation: rise 0.5s ease forwards; }
 
     .mic-wrap {
@@ -269,7 +267,6 @@
 
     .btn-end:hover { border-color: var(--error); color: var(--error); }
 
-    /* ── DONE ── */
     #state-done { opacity: 0; animation: rise 0.5s ease forwards; }
 
     .checkmark {
@@ -395,66 +392,12 @@
 
 <div class="footer">ravemarketing.co</div>
 
-<!--
-═══════════════════════════════════════════════════════════════
-GOOGLE SHEETS SETUP — one time only
-═══════════════════════════════════════════════════════════════
-
-1. Create a Google Sheet. Add these headers in Row 1:
-   A: Timestamp  B: First Name  C: Last Name  D: Email
-   E: Session ID  F: Page URL  G: Device  H: Browser
-   I: EL Conversation ID  J: Duration (secs)  K: Status  L: Transcript
-
-2. Extensions → Apps Script → delete existing code → paste this:
-
-─────────────────────────────────────────────────────────────
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data  = JSON.parse(e.postData.contents);
-
-  if (data.action === 'register') {
-    sheet.appendRow([
-      data.timestamp, data.firstName, data.lastName, data.email,
-      data.sessionId, data.pageUrl, data.device, data.browser,
-      '', '', 'started', ''
-    ]);
-  }
-
-  if (data.action === 'complete') {
-    var rows = sheet.getDataRange().getValues();
-    for (var i = 1; i < rows.length; i++) {
-      if (rows[i][4] === data.sessionId) {
-        sheet.getRange(i+1, 9).setValue(data.conversationId || '');
-        sheet.getRange(i+1, 10).setValue(data.duration      || '');
-        sheet.getRange(i+1, 11).setValue('completed');
-        sheet.getRange(i+1, 12).setValue(data.transcript    || '');
-        break;
-      }
-    }
-  }
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ success: true }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-─────────────────────────────────────────────────────────────
-
-3. Deploy → New deployment → Web app
-   Execute as: Me | Who has access: Anyone
-   Copy the Web App URL → paste as SHEETS_ENDPOINT below
-
-═══════════════════════════════════════════════════════════════
--->
-
 <script type="module">
-  // ── ElevenLabs SDK via ESM (correct import) ────────────────────────
   import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@latest/+esm';
 
-  // ── Config ─────────────────────────────────────────────────────────
   const AGENT_ID        = 'agent_1001kh4fjj6hfdkv25v56yeksgzc';
-  const SHEETS_ENDPOINT = 'YOUR_APPS_SCRIPT_URL'; // ← paste Google Apps Script URL here
+  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyO8aLiW_IFSjVXRYd7-Cz0yEzBZvOHCxvefTc5RjAJi4xySybS0XjWUm3rFx0A7Y6z/exec';
 
-  // ── State ───────────────────────────────────────────────────────────
   let customer       = {};
   let conversation   = null;
   let startTime      = null;
@@ -511,7 +454,6 @@ function doPost(e) {
   }
 
   async function sheetsWrite(payload) {
-    if (SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_URL') return;
     try {
       await fetch(SHEETS_ENDPOINT, {
         method:  'POST',
@@ -524,7 +466,6 @@ function doPost(e) {
     }
   }
 
-  // ── Start button ────────────────────────────────────────────────────
   $('btn-start').addEventListener('click', async () => {
     const data = validate();
     if (!data) return;
@@ -561,7 +502,6 @@ function doPost(e) {
     startConversation();
   });
 
-  // ── ElevenLabs SDK ──────────────────────────────────────────────────
   async function startConversation() {
     startTime = Date.now();
 
@@ -569,7 +509,6 @@ function doPost(e) {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
       $('status-label').textContent = 'Microphone access needed';
-      console.error('Mic permission denied', err);
       return;
     }
 
@@ -589,7 +528,6 @@ function doPost(e) {
         },
 
         onMessage: ({ source, message }) => {
-          // source is 'ai' or 'user'
           const role = source === 'ai' ? 'agent' : 'user';
           appendTranscript(role, message);
         },
@@ -637,7 +575,6 @@ function doPost(e) {
     }
   }
 
-  // ── Mute ────────────────────────────────────────────────────────────
   $('btn-mute').addEventListener('click', () => {
     if (!conversation) return;
     isMuted = !isMuted;
@@ -648,7 +585,6 @@ function doPost(e) {
     $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
   });
 
-  // ── End ─────────────────────────────────────────────────────────────
   $('btn-end').addEventListener('click', async () => {
     if (conversation) await conversation.endSession();
   });
