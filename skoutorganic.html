@@ -681,8 +681,8 @@
       variant:   VARIANT,
     };
 
-    // Register session without identity — identity captured post-conversation
-    await sheetsWrite({
+    // Fire and forget — don't block UI on network call
+    sheetsWrite({
       action:    'register',
       timestamp: customer.timestamp,
       sessionId: customer.sessionId,
@@ -839,12 +839,17 @@
     customer.firstName = first;
     customer.email     = email;
 
-    // Write identity to same backend, linking via sessionId
+    // Use 'register' action — matches what the Apps Script expects
     await sheetsWrite({
-      action:    'identify',
+      action:    'register',
+      timestamp: new Date().toISOString(),
       sessionId: customer.sessionId,
       firstName: customer.firstName,
+      lastName:  '',
       email:     customer.email,
+      pageUrl:   customer.pageUrl,
+      device:    customer.device,
+      browser:   customer.browser,
       variant:   VARIANT,
     });
 
