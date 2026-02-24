@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/insights", "destination": "/insights.html" }
+    { "source": "/insights",      "destination": "/insights.html" },
+    { "source": "/skoutorganic",  "destination": "/skoutorganic.html" }
   ]
 }
