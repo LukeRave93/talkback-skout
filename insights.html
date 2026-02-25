@@ -794,13 +794,17 @@ const DEMO = [
 
 // ── CSV PARSE ────────────────────────────────────────────────────────────────
 function parseCSV(text) {
+  // Normalise line endings so \r\n (Windows) and \r (old Mac) both work
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = text.split('\n');
   if (lines.length < 2) return [];
+  // Auto-detect delimiter: prefer tab if the header row contains tabs
+  const delimiter = lines[0].includes('\t') ? '\t' : ',';
   function parseLine(line) {
     const result = []; let cur = ''; let inQ = false;
     for (let i = 0; i < line.length; i++) {
       if (line[i] === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
-      else if ((line[i] === '\t' || line[i] === ',') && !inQ) { result.push(cur); cur=''; }
+      else if (line[i] === delimiter && !inQ) { result.push(cur); cur=''; }
       else cur += line[i];
     }
     result.push(cur);
