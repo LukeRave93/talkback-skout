@@ -848,7 +848,13 @@ function classify(row) {
 }
 
 function analyseData(rows) {
-  const completed = rows.filter(r => r.status==='completed' && (r.transcript||'').length > 80);
+  rows.forEach(r => {
+    // Some CSV exports store newlines as literal \n text — unescape them
+    if (r.transcript && r.transcript.includes('\\n')) {
+      r.transcript = r.transcript.replace(/\\n/g, '\n');
+    }
+  });
+  const completed = rows.filter(r => (r.status||'').toLowerCase().trim()==='completed' && (r.transcript||'').length > 80);
   const classified = completed.map(classify);
   const reasons = {};
   classified.forEach(c => c.reasons.forEach(r => { reasons[r]=(reasons[r]||0)+1; }));
@@ -860,7 +866,7 @@ function analyseData(rows) {
     return m[1].toLowerCase() !== (r.first_name||'').toLowerCase() && m[1].length > 2;
   });
 
-  const incomplete = rows.filter(r => r.status==='started' || (r.status==='completed' && (r.transcript||'').length < 80));
+  const incomplete = rows.filter(r => (r.status||'').toLowerCase().trim()==='started' || ((r.status||'').toLowerCase().trim()==='completed' && (r.transcript||'').length < 80));
   const veryShort  = completed.filter(r => +r.duration_secs > 0 && +r.duration_secs < 30);
 
   return { rows, completed, classified, reasons, nameFlags, incomplete, veryShort };
@@ -967,7 +973,7 @@ function render(data) {
       <td>${r.first_name||''} ${r.last_name||''}</td>
       <td>${date}</td>
       <td>${dur}</td>
-      <td><span class="t-chip ${r.status==='completed'?'chip-lifestyle':'chip-incomplete'}">${r.status||'—'}</span></td>
+      <td><span class="t-chip ${(r.status||'').toLowerCase().trim()==='completed'?'chip-lifestyle':'chip-incomplete'}">${r.status||'—'}</span></td>
       <td><span class="t-chip ${m.chipClass}">${m.label}</span></td>
       <td style="color:#6B5F55;font-style:italic;max-width:260px">${q}</td>
       <td>${isFlagged?'<span class="t-chip chip-flag">Name mismatch</span>':''}</td>
