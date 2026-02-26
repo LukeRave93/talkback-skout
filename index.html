@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TalkBack — Skout Organic</title>
+  <title>TalkBack</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -17,7 +17,6 @@
       --sage:  #4A6741;
       --dust:  #C9BFB3;
       --warm:  #E8DDD4;
-      --error: #9B5050;
     }
 
     html, body {
@@ -30,11 +29,11 @@
 
     body {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       padding: 2rem;
+      text-align: center;
     }
 
     body::before {
@@ -49,762 +48,58 @@
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 520px;
+      max-width: 640px;
       width: 100%;
-      text-align: center;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 3rem;
       opacity: 0;
-      animation: rise 0.7s ease forwards;
+      animation: rise 0.8s ease 0.1s forwards;
     }
-
-    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
-
-    .brand-name {
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--sage);
-      font-weight: 500;
-    }
-
-    .state { display: none; }
-    .state.active { display: block; }
-
-    /* ── FORM ── */
-    #state-form { opacity: 0; animation: rise 0.7s ease 0.15s forwards; }
 
     .headline {
       font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.9rem, 6vw, 2.6rem);
+      font-size: clamp(2.2rem, 7vw, 3.6rem);
       line-height: 1.15;
       letter-spacing: -0.01em;
-      margin-bottom: 1rem;
+      margin-bottom: 2.5rem;
     }
 
-    .headline em { font-style: italic; color: var(--sage); }
-
-    .subline {
-      font-size: 0.95rem;
-      line-height: 1.65;
-      color: #6B5F55;
-      margin-bottom: 2rem;
-      max-width: 360px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .fields { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; text-align: left; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
-    .field { display: flex; flex-direction: column; gap: 0.35rem; }
-
-    .field label {
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #8A7D74;
-      font-weight: 500;
-    }
-
-    .field input {
-      background: white;
-      border: 1px solid var(--warm);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 300;
-      color: var(--ink);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      width: 100%;
-    }
-
-    .field input::placeholder { color: var(--dust); }
-    .field input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(74,103,65,0.08); }
-    .field input.invalid { border-color: var(--error); }
-    .field-error { font-size: 0.72rem; color: var(--error); display: none; }
-    .field-error.visible { display: block; }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      background: var(--ink);
-      color: var(--cream);
-      border: none;
-      border-radius: 100px;
-      padding: 1rem 2rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-      outline: none;
-      width: 100%;
-    }
-
-    .btn-primary:hover:not(:disabled) { background: var(--sage); transform: translateY(-1px); }
-    .btn-primary:active:not(:disabled) { transform: translateY(0); }
-    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
-    .btn-primary:hover:not(:disabled) svg { transform: translateX(2px); }
-    .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
-
-    /* ── ACTIVE ── */
-    #state-active { opacity: 0; animation: rise 0.5s ease forwards; }
-
-    .mic-wrap {
-      width: 96px; height: 96px;
-      margin: 0 auto 2rem;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .ring {
-      position: absolute;
-      border-radius: 50%;
-      background: var(--sage);
-      opacity: 0;
-      width: 96px; height: 96px;
-    }
-
-    .ring-1 { animation: ripple 2.4s ease-out infinite; }
-    .ring-2 { animation: ripple 2.4s ease-out infinite 0.8s; }
-    .ring-3 { animation: ripple 2.4s ease-out infinite 1.6s; }
-
-    .mic-wrap.agent-speaking .ring { background: var(--ink); }
-
-    /* The mic button — also the ending animation anchor */
-    .mic-btn {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: var(--sage);
-      border: none;
-      cursor: pointer;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease;
-      outline: none;
-      transform-origin: center center;
-    }
-
-    .mic-btn:hover { background: #3a5433; }
-    .mic-btn.muted { background: #8A7D74; }
-    .mic-btn svg { color: white; pointer-events: none; }
-
-    /* Ending sequence — spin + expand + contract */
-    .mic-btn.ending {
-      animation: mic-farewell 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      pointer-events: none;
-      cursor: default;
-    }
-
-    @keyframes mic-farewell {
-      0%   { transform: scale(1)    rotate(0deg);   background: var(--sage); }
-      30%  { transform: scale(1)    rotate(180deg); background: var(--sage); }
-      60%  { transform: scale(1.5)  rotate(320deg); background: var(--sage); }
-      80%  { transform: scale(1.65) rotate(355deg); background: var(--sage); }
-      90%  { transform: scale(0.8)  rotate(360deg); background: var(--sage); }
-      100% { transform: scale(0)    rotate(360deg); background: var(--sage); opacity: 0; }
-    }
-
-    /* Rings fade out during ending */
-    .mic-wrap.ending .ring { animation: none; opacity: 0; transition: opacity 0.3s ease; }
-
-    .status-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+    .headline em {
+      font-style: italic;
       color: var(--sage);
-      font-weight: 500;
-      margin-bottom: 0.6rem;
-      transition: color 0.3s ease, opacity 0.3s ease;
     }
 
-    .status-label.speaking { color: var(--ink); }
-    .status-label.ending   { opacity: 0; }
-
-    .active-headline { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .active-name { color: var(--sage); }
-
-    .transcript-wrap {
-      margin-top: 1.75rem;
-      text-align: left;
-      max-height: 200px;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-    }
-
-    .transcript-wrap::-webkit-scrollbar { width: 3px; }
-    .transcript-wrap::-webkit-scrollbar-thumb { background: var(--dust); border-radius: 2px; }
-
-    .transcript-line {
-      font-size: 0.82rem;
-      line-height: 1.6;
-      margin-bottom: 0.6rem;
-      opacity: 0;
-      animation: rise 0.3s ease forwards;
-      padding-left: 0.75rem;
-      border-left: 2px solid transparent;
-    }
-
-    .transcript-line.agent { color: var(--ink); border-left-color: var(--sage); font-weight: 400; }
-    .transcript-line.user  { color: #6B5F55;    border-left-color: var(--dust); }
-
-    .transcript-speaker {
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 500;
-      margin-bottom: 0.1rem;
-    }
-
-    .agent .transcript-speaker { color: var(--sage); }
-    .user  .transcript-speaker { color: var(--dust); }
-
-    .btn-end {
-      margin-top: 2rem;
-      background: none;
-      border: 1px solid var(--warm);
-      border-radius: 100px;
-      padding: 0.6rem 1.5rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      color: #8A7D74;
-      cursor: pointer;
-      transition: border-color 0.2s ease, color 0.2s ease, opacity 0.3s ease;
-      outline: none;
-    }
-
-    .btn-end:hover { border-color: var(--error); color: var(--error); }
-    .btn-end.ending { opacity: 0; pointer-events: none; }
-
-    .timer {
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      color: var(--dust);
-      font-weight: 400;
-      font-variant-numeric: tabular-nums;
-      margin-top: 0.5rem;
-      transition: opacity 0.3s ease;
-    }
-
-    .timer.ending { opacity: 0; }
-
-    /* ── DONE ── */
-    #state-done { opacity: 0; animation: rise 0.6s ease forwards; }
-
-    .done-header {
-      margin-bottom: 2rem;
-    }
-
-    .done-eyebrow {
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--sage);
-      font-weight: 500;
-      margin-bottom: 0.75rem;
-    }
-
-    .done-headline {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.6rem, 5vw, 2.1rem);
-      line-height: 1.2;
-      margin-bottom: 1.25rem;
-    }
-
-    .done-body {
-      font-size: 0.92rem;
-      color: #6B5F55;
-      line-height: 1.75;
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
-    .divider { width: 32px; height: 1px; background: var(--dust); margin: 2rem auto; }
-
-    /* Editable transcript */
-    .transcript-section {
-      text-align: left;
-    }
-
-    .transcript-section-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #8A7D74;
-      font-weight: 500;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .edit-hint {
-      font-size: 0.68rem;
-      color: var(--dust);
-      letter-spacing: 0.04em;
-      text-transform: none;
-      font-weight: 300;
-    }
-
-    .transcript-editable {
-      width: 100%;
-      min-height: 200px;
-      background: white;
-      border: 1px solid var(--warm);
-      border-radius: 10px;
-      padding: 1rem 1.1rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      line-height: 1.75;
-      color: var(--ink);
-      font-weight: 300;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .transcript-editable:focus {
-      border-color: var(--sage);
-      box-shadow: 0 0 0 3px rgba(74,103,65,0.08);
-    }
-
-    .btn-save {
-      margin-top: 1rem;
+    .btn-interested {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: none;
-      border: 1px solid var(--sage);
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--dust);
       border-radius: 100px;
-      padding: 0.6rem 1.4rem;
+      padding: 0.75rem 1.75rem;
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      color: var(--sage);
-      cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
-      outline: none;
+      font-size: 0.88rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
     }
 
-    .btn-save:hover { background: var(--sage); color: white; }
-    .btn-save.saved { background: var(--sage); color: white; pointer-events: none; }
+    .btn-interested:hover {
+      border-color: var(--sage);
+      color: var(--sage);
+      transform: translateY(-1px);
+    }
 
     @keyframes rise {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes ripple {
-      0%   { transform: scale(1);   opacity: 0.18; }
-      100% { transform: scale(2.2); opacity: 0; }
-    }
-
-    .footer {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 0; right: 0;
-      text-align: center;
-      font-size: 0.7rem;
-      color: var(--dust);
-      letter-spacing: 0.05em;
-      z-index: 1;
     }
   </style>
 </head>
 <body>
-
-<div class="wrap">
-
-  <div class="brand">
-    <div class="brand-dot"></div>
-    <span class="brand-name">Skout Organic × TalkBack</span>
+  <div class="wrap">
+    <h1 class="headline">let your customers tell you,<br><em>in their own words.</em></h1>
+    <a class="btn-interested" href="mailto:luke@therave.co">Interested? →</a>
   </div>
-
-  <!-- STEP 1: Form -->
-  <div id="state-form" class="state active">
-    <h1 class="headline">Tell us why you <em>left.</em></h1>
-    <p class="subline">Two minutes, no typing — just a quick voice conversation. We'll send you something for your time.</p>
-
-    <div class="fields">
-      <div class="field-row">
-        <div class="field">
-          <label for="f-first">First name</label>
-          <input id="f-first" type="text" placeholder="Jane" autocomplete="given-name" />
-          <span class="field-error" id="e-first">Required</span>
-        </div>
-        <div class="field">
-          <label for="f-last">Last name</label>
-          <input id="f-last" type="text" placeholder="Smith" autocomplete="family-name" />
-          <span class="field-error" id="e-last">Required</span>
-        </div>
-      </div>
-      <div class="field">
-        <label for="f-email">Email address</label>
-        <input id="f-email" type="email" placeholder="jane@example.com" autocomplete="email" />
-        <span class="field-error" id="e-email">Please enter a valid email</span>
-      </div>
-    </div>
-
-    <button class="btn-primary" id="btn-start">
-      Start talking
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-      </svg>
-    </button>
-    <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
-  </div>
-
-  <!-- STEP 2: Active conversation -->
-  <div id="state-active" class="state">
-    <div class="mic-wrap" id="mic-wrap">
-      <div class="ring ring-1"></div>
-      <div class="ring ring-2"></div>
-      <div class="ring ring-3"></div>
-      <button class="mic-btn" id="btn-mute" title="Mute / unmute">
-        <svg id="icon-mic" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/>
-          <line x1="8"  y1="23" x2="16" y2="23" stroke-linecap="round"/>
-        </svg>
-        <svg id="icon-muted" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" opacity="0.4"/>
-          <line x1="1" y1="1" x2="23" y2="23" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
-
-    <p class="status-label" id="status-label">Connecting…</p>
-    <h2 class="active-headline">We're all ears, <span class="active-name" id="active-name"></span></h2>
-
-    <div class="transcript-wrap" id="transcript"></div>
-    <button class="btn-end" id="btn-end">End conversation</button>
-    <div class="timer" id="timer">0:00</div>
-  </div>
-
-  <!-- STEP 3: Done -->
-  <div id="state-done" class="state">
-
-    <div class="done-header">
-      <p class="done-eyebrow">Conversation complete</p>
-      <h2 class="done-headline">Hey <span id="done-name"></span>, thanks for taking the time to speak with us.</h2>
-      <p class="done-body">
-        Our team are reviewing the conversation — this typically takes 24 hours or less.
-        We'll send your reward as soon as it's been reviewed.
-      </p>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="transcript-section">
-      <div class="transcript-section-label">
-        Your transcript
-        <span class="edit-hint">Feel free to edit if anything needs correcting</span>
-      </div>
-      <textarea class="transcript-editable" id="transcript-editable" placeholder="Your conversation will appear here…"></textarea>
-      <button class="btn-save" id="btn-save">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-        </svg>
-        Save edits
-      </button>
-    </div>
-
-  </div>
-
-</div>
-
-<div class="footer">ravemarketing.co</div>
-
-<script type="module">
-  import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@latest/+esm';
-
-  const AGENT_ID        = 'agent_1001kh4fjj6hfdkv25v56yeksgzc';
-  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyO8aLiW_IFSjVXRYd7-Cz0yEzBZvOHCxvefTc5RjAJi4xySybS0XjWUm3rFx0A7Y6z/exec';
-
-  let customer       = {};
-  let conversation   = null;
-  let startTime      = null;
-  let isMuted        = false;
-  let fullTranscript = [];
-
-  const $ = id => document.getElementById(id);
-
-  function getDevice()  { return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop'; }
-  function getBrowser() {
-    const ua = navigator.userAgent;
-    if (ua.includes('Chrome') && !ua.includes('Edg'))   return 'Chrome';
-    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-    if (ua.includes('Firefox')) return 'Firefox';
-    if (ua.includes('Edg'))     return 'Edge';
-    return 'Other';
-  }
-
-  function show(name) {
-    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
-    const el = $('state-' + name);
-    el.style.animation = 'none';
-    el.offsetHeight;
-    el.style.animation = '';
-    el.classList.add('active');
-  }
-
-  function validate() {
-    let ok    = true;
-    const first = $('f-first').value.trim();
-    const last  = $('f-last').value.trim();
-    const email = $('f-email').value.trim();
-
-    [['f-first','e-first', !first],
-     ['f-last', 'e-last',  !last],
-     ['f-email','e-email',  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)]
-    ].forEach(([inp, err, bad]) => {
-      $(inp).classList.toggle('invalid', bad);
-      $(err).classList.toggle('visible', bad);
-      if (bad) ok = false;
-    });
-
-    return ok ? { first, last, email } : null;
-  }
-
-  function appendTranscript(role, text) {
-    const wrap = $('transcript');
-    const line = document.createElement('div');
-    line.className = 'transcript-line ' + role;
-    line.innerHTML = `<div class="transcript-speaker">${role === 'agent' ? 'Skout' : 'You'}</div>${text}`;
-    wrap.appendChild(line);
-    wrap.scrollTop = wrap.scrollHeight;
-    fullTranscript.push({ role, text });
-  }
-
-  async function sheetsWrite(payload) {
-    try {
-      await fetch(SHEETS_ENDPOINT, {
-        method:  'POST',
-        mode:    'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload)
-      });
-    } catch (err) {
-      console.warn('Sheets write failed:', err);
-    }
-  }
-
-  // ── Timer ─────────────────────────────────────────────────────────
-  let timerInterval = null;
-
-  function startTimer() {
-    const el = $('timer');
-    let secs = 0;
-    timerInterval = setInterval(() => {
-      secs++;
-      const m = Math.floor(secs / 60);
-      const s = String(secs % 60).padStart(2, '0');
-      el.textContent = `${m}:${s}`;
-    }, 1000);
-  }
-
-  function stopTimer() {
-    clearInterval(timerInterval);
-    $('timer').classList.add('ending');
-  }
-
-  // ── Form submit ──────────────────────────────────────────────────────
-  $('btn-start').addEventListener('click', async () => {
-    const data = validate();
-    if (!data) return;
-
-    const btn = $('btn-start');
-    btn.disabled    = true;
-    btn.textContent = 'Starting…';
-
-    customer = {
-      firstName: data.first,
-      lastName:  data.last,
-      email:     data.email,
-      sessionId: 'tb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-      pageUrl:   window.location.href,
-      device:    getDevice(),
-      browser:   getBrowser(),
-      timestamp: new Date().toISOString(),
-    };
-
-    await sheetsWrite({
-      action:    'register',
-      timestamp: customer.timestamp,
-      firstName: customer.firstName,
-      lastName:  customer.lastName,
-      email:     customer.email,
-      sessionId: customer.sessionId,
-      pageUrl:   customer.pageUrl,
-      device:    customer.device,
-      browser:   customer.browser,
-    });
-
-    $('active-name').textContent = customer.firstName + '.';
-    show('active');
-    startConversation();
-  });
-
-  // ── ElevenLabs SDK ───────────────────────────────────────────────────
-  async function startConversation() {
-    startTime = Date.now();
-
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      $('status-label').textContent = 'Microphone access needed';
-      return;
-    }
-
-    try {
-      conversation = await Conversation.startSession({
-        agentId: AGENT_ID,
-
-        dynamicVariables: {
-          customer_first_name: customer.firstName,
-          customer_last_name:  customer.lastName,
-          customer_email:      customer.email,
-          session_id:          customer.sessionId,
-        },
-
-        onConnect: () => {
-          $('status-label').textContent = 'Listening';
-          startTimer();
-        },
-
-        onMessage: ({ source, message }) => {
-          const role = source === 'ai' ? 'agent' : 'user';
-          appendTranscript(role, message);
-        },
-
-        onModeChange: ({ mode }) => {
-          const wrap  = $('mic-wrap');
-          const label = $('status-label');
-          if (mode === 'speaking') {
-            wrap.classList.add('agent-speaking');
-            label.textContent = 'Skout is speaking…';
-            label.classList.add('speaking');
-          } else {
-            wrap.classList.remove('agent-speaking');
-            label.textContent = isMuted ? 'Muted' : 'Listening';
-            label.classList.remove('speaking');
-          }
-        },
-
-        onDisconnect: async () => {
-          await triggerEndingSequence();
-        },
-
-        onError: (msg) => {
-          console.error('ElevenLabs error:', msg);
-          $('status-label').textContent = 'Connection error — please refresh';
-        },
-      });
-
-    } catch (err) {
-      console.error('Failed to start session:', err);
-      $('status-label').textContent = 'Could not connect — please refresh';
-    }
-  }
-
-  // ── End animation then transition to done screen ─────────────────────
-  async function triggerEndingSequence() {
-    const duration = Math.round((Date.now() - startTime) / 1000);
-    const transcriptText = fullTranscript
-      .map(t => `${t.role === 'agent' ? 'Skout' : 'You'}: ${t.text}`)
-      .join('\n');
-
-    // Write to Sheets in background
-    sheetsWrite({
-      action:         'complete',
-      sessionId:      customer.sessionId,
-      conversationId: conversation?.getId?.() || '',
-      duration,
-      transcript:     transcriptText,
-    });
-
-    // Trigger mic spin + expand + collapse animation
-    const micBtn  = $('btn-mute');
-    const micWrap = $('mic-wrap');
-    const label   = $('status-label');
-    const endBtn  = $('btn-end');
-
-    label.classList.add('ending');
-    endBtn.classList.add('ending');
-    micWrap.classList.add('ending');
-    micBtn.classList.add('ending');
-    stopTimer();
-
-    // Wait for animation to complete (1.4s) then pop to done
-    await new Promise(r => setTimeout(r, 1400));
-
-    // Populate done screen
-    $('done-name').textContent = customer.firstName;
-    $('transcript-editable').value = transcriptText;
-
-    show('done');
-  }
-
-  // ── Mute ─────────────────────────────────────────────────────────────
-  $('btn-mute').addEventListener('click', () => {
-    if (!conversation) return;
-    isMuted = !isMuted;
-    conversation.setMicMuted(isMuted);
-    $('btn-mute').classList.toggle('muted', isMuted);
-    $('icon-mic').style.display   = isMuted ? 'none'  : 'block';
-    $('icon-muted').style.display = isMuted ? 'block' : 'none';
-    $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
-  });
-
-  // ── End call ──────────────────────────────────────────────────────────
-  $('btn-end').addEventListener('click', async () => {
-    if (conversation) {
-      await conversation.endSession();
-      // onDisconnect fires → triggerEndingSequence
-    } else {
-      await triggerEndingSequence();
-    }
-  });
-
-  // ── Save edited transcript back to Sheets ─────────────────────────────
-  $('btn-save').addEventListener('click', async () => {
-    const edited = $('transcript-editable').value;
-    const btn    = $('btn-save');
-    btn.textContent = 'Saving…';
-
-    await sheetsWrite({
-      action:    'complete',
-      sessionId: customer.sessionId,
-      transcript: edited,
-      edited:    true,
-    });
-
-    btn.innerHTML = `
-      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-      </svg>
-      Saved
-    `;
-    btn.classList.add('saved');
-  });
-
-</script>
-
 </body>
 </html>
