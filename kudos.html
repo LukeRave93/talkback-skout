@@ -13,12 +13,13 @@
 
     :root {
       --white:   #FFFFFF;
-      --ink:     #1A1612;
-      --red:     #CC4433;
+      --ink:     #111111;
       --purple:  #5118EE;
-      --dust:    #C9BFB3;
-      --warm:    #E8DDD4;
+      --purple-dark: #3d10c4;
+      --dust:    #AAAAAA;
+      --border:  #E5E5E5;
       --error:   #CC4433;
+      --muted:   #666666;
     }
 
     html, body {
@@ -93,7 +94,7 @@
     .subline {
       font-size: 0.95rem;
       line-height: 1.65;
-      color: #6B5F55;
+      color: var(--muted);
       margin-bottom: 2rem;
       max-width: 360px;
       margin-left: auto;
@@ -120,7 +121,7 @@
       width: 100%;
     }
 
-    .btn-primary:hover:not(:disabled) { background: var(--red); transform: translateY(-1px); }
+    .btn-primary:hover:not(:disabled) { background: var(--purple-dark); transform: translateY(-1px); }
     .btn-primary:active:not(:disabled) { transform: translateY(0); }
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
@@ -151,7 +152,7 @@
     .ring-2 { animation: ripple 2.4s ease-out infinite 0.8s; }
     .ring-3 { animation: ripple 2.4s ease-out infinite 1.6s; }
 
-    .mic-wrap.agent-speaking .ring { background: var(--red); }
+    .mic-wrap.agent-speaking .ring { background: var(--ink); }
 
     .mic-btn {
       width: 56px; height: 56px;
@@ -200,7 +201,7 @@
       transition: color 0.3s ease, opacity 0.3s ease;
     }
 
-    .status-label.speaking { color: var(--red); }
+    .status-label.speaking { color: var(--ink); }
     .status-label.ending   { opacity: 0; }
 
     .active-headline { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
@@ -227,7 +228,7 @@
     }
 
     .transcript-line.agent { color: var(--ink); border-left-color: var(--purple); font-weight: 400; }
-    .transcript-line.user  { color: #6B5F55;    border-left-color: var(--dust); }
+    .transcript-line.user  { color: var(--muted); border-left-color: var(--border); }
 
     .transcript-speaker {
       font-size: 0.65rem;
@@ -243,18 +244,18 @@
     .btn-end {
       margin-top: 2rem;
       background: none;
-      border: 1px solid var(--warm);
+      border: 1px solid var(--border);
       border-radius: 100px;
       padding: 0.6rem 1.5rem;
       font-family: 'DM Sans', sans-serif;
       font-size: 0.8rem;
-      color: #8A7D74;
+      color: var(--muted);
       cursor: pointer;
       transition: border-color 0.2s ease, color 0.2s ease, opacity 0.3s ease;
       outline: none;
     }
 
-    .btn-end:hover { border-color: var(--red); color: var(--red); }
+    .btn-end:hover { border-color: var(--ink); color: var(--ink); }
     .btn-end.ending { opacity: 0; pointer-events: none; }
 
     .timer {
@@ -290,7 +291,7 @@
 
     .capture-subline {
       font-size: 0.92rem;
-      color: #6B5F55;
+      color: var(--muted);
       line-height: 1.65;
       max-width: 340px;
       margin: 0 auto 2rem;
@@ -301,7 +302,7 @@
       align-items: center;
       gap: 0.5rem;
       background: white;
-      border: 1px solid var(--warm);
+      border: 1px solid var(--border);
       border-radius: 100px;
       padding: 0.5rem 1rem;
       font-size: 0.78rem;
@@ -330,13 +331,13 @@
       font-size: 0.7rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #8A7D74;
+      color: var(--muted);
       font-weight: 500;
     }
 
     .field input {
       background: white;
-      border: 1px solid var(--warm);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.75rem 1rem;
       font-family: 'DM Sans', sans-serif;
@@ -350,8 +351,8 @@
 
     .field input::placeholder { color: var(--dust); }
     .field input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(81,24,238,0.08); }
-    .field input.invalid { border-color: var(--red); }
-    .field-error { font-size: 0.72rem; color: var(--red); display: none; }
+    .field input.invalid { border-color: var(--error); }
+    .field-error { font-size: 0.72rem; color: var(--error); display: none; }
     .field-error.visible { display: block; }
 
     /* ── DONE ── */
@@ -377,13 +378,13 @@
 
     .done-body {
       font-size: 0.92rem;
-      color: #6B5F55;
+      color: var(--muted);
       line-height: 1.75;
       max-width: 420px;
       margin: 0 auto;
     }
 
-    .divider { width: 32px; height: 1px; background: var(--dust); margin: 2rem auto; }
+    .divider { width: 32px; height: 1px; background: var(--border); margin: 2rem auto; }
 
     .transcript-section { text-align: left; }
 
@@ -391,7 +392,7 @@
       font-size: 0.7rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #8A7D74;
+      color: var(--muted);
       font-weight: 500;
       margin-bottom: 1rem;
       display: flex;
@@ -411,7 +412,7 @@
       width: 100%;
       min-height: 200px;
       background: white;
-      border: 1px solid var(--warm);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 1rem 1.1rem;
       font-family: 'DM Sans', sans-serif;
@@ -482,7 +483,7 @@
 
   <!-- STEP 1: Landing -->
   <div id="state-landing" class="state active">
-    <h1 class="headline">Share what you <em>love.</em></h1>
+    <h1 class="headline">Share your <em>honest</em> feedback.</h1>
     <p class="subline">Two minutes, no typing — just a quick voice conversation. We'll send you something for your time.</p>
 
     <button class="btn-primary" id="btn-start">
@@ -593,7 +594,7 @@
   import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@latest/+esm';
 
   const AGENT_ID        = 'agent_5501kka39vpdf7raf1tenz16h61n';
-  const SHEETS_ENDPOINT = 'KUDOS_SHEETS_ENDPOINT_PLACEHOLDER';
+  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwL8nX-C_w07bh96qhXpNeQRYrU7nG_xFyn6nHt25uVcU7K29BwqGG8qK2nCxWcZrQMLQ/exec';
 
   const VARIANT = 'kudos';
 
