@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/insights",             "destination": "/insights.html" },
     { "source": "/skoutorganic",         "destination": "/skoutorganic.html" },
-    { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" }
+    { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" },
+    { "source": "/kudos",                "destination": "/kudos.html" }
   ]
 }
