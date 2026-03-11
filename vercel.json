@@ -3,6 +3,7 @@
     { "source": "/insights",             "destination": "/insights.html" },
     { "source": "/skoutorganic",         "destination": "/skoutorganic.html" },
     { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" },
-    { "source": "/kudos",                "destination": "/kudos.html" }
+    { "source": "/kudos",                "destination": "/kudos.html" },
+    { "source": "/withsmall",            "destination": "/withsmall.html" }
   ]
 }
