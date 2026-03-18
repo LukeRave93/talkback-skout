@@ -134,6 +134,14 @@
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
     .btn-primary:hover:not(:disabled) svg { transform: translateX(2px); }
+    .disclaimer {
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--mist);
+      max-width: 360px;
+      margin: 1.75rem auto 0;
+    }
+
     .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--mist); }
 
     /* ── ACTIVE ── */
@@ -495,7 +503,7 @@
   <!-- STEP 1: Landing -->
   <div id="state-landing" class="state active">
     <h1 class="headline">Tell us about your <em>recent order.</em></h1>
-    <p class="subline">Two minutes, no typing — just a quick voice chat about your experience. We'll send you something for your time.</p>
+    <p class="subline">Two minutes, no typing. Just a quick voice chat about your experience. We'll send you something for your time.</p>
 
     <button class="btn-primary" id="btn-start">
       Start talking
@@ -504,6 +512,8 @@
       </svg>
     </button>
     <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
+
+    <p class="disclaimer"><em>Before we start, you'll be chatting with an AI voice agent, not a Yarntons team member. Anything you share will be used by Yarntons to improve our range and customer experience, in line with the Privacy Act 2020.</em></p>
   </div>
 
   <!-- STEP 2: Active conversation -->
@@ -574,7 +584,7 @@
       <p class="done-eyebrow">You're all set</p>
       <h2 class="done-headline">Thanks <span id="done-name"></span>, your reward is on its way.</h2>
       <p class="done-body">
-        Our team are reviewing the conversation — this typically takes 24 hours or less.
+        Our team are reviewing the conversation. This typically takes 24 hours or less.
         We'll send your $10 Uber Eats gift card to <strong id="done-email"></strong> as soon as it's been reviewed.
       </p>
     </div>
@@ -752,13 +762,13 @@
 
         onError: (msg) => {
           console.error('ElevenLabs error:', msg);
-          $('status-label').textContent = 'Connection error — please refresh';
+          $('status-label').textContent = 'Connection error. Please refresh';
         },
       });
 
     } catch (err) {
       console.error('Failed to start session:', err);
-      $('status-label').textContent = 'Could not connect — please refresh';
+      $('status-label').textContent = 'Could not connect. Please refresh';
     }
   }
 
