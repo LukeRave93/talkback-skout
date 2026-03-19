@@ -5,6 +5,7 @@
     { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" },
     { "source": "/kudos",                "destination": "/kudos.html" },
     { "source": "/withsmall",            "destination": "/withsmall.html" },
-    { "source": "/yarntons",             "destination": "/yarntons.html" }
+    { "source": "/yarntons",             "destination": "/yarntons.html" },
+    { "source": "/thebuildermarket",    "destination": "/thebuildermarket.html" }
   ]
 }
