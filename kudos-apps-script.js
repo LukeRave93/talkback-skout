@@ -121,7 +121,39 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return ContentService
-    .createTextOutput('TalkBack Kudos endpoint is live.')
-    .setMimeType(ContentService.MimeType.TEXT);
+  const params = (e && e.parameter) ? e.parameter : {};
+
+  if (params.action !== 'getData') {
+    return ContentService
+      .createTextOutput('TalkBack endpoint is live.')
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  try {
+    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_NAME);
+
+    if (!sheet) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ rows: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const values  = sheet.getDataRange().getValues();
+    const headers = values[0];
+    const rows    = values.slice(1).map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = row[i] instanceof Date ? row[i].toISOString() : row[i]; });
+      return obj;
+    });
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ rows }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: err.toString(), rows: [] }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }

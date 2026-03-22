@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/dashboard",            "destination": "/dashboard.html" },
     { "source": "/insights",             "destination": "/insights.html" },
     { "source": "/skoutorganic",         "destination": "/skoutorganic.html" },
     { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" },

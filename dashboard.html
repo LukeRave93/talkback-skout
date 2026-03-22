@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TalkBack — Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #F8F7F5;
+      --surface:    #FFFFFF;
+      --ink:        #111111;
+      --muted:      #777777;
+      --border:     #E8E8E8;
+      --purple:     #5118EE;
+      --purple-bg:  #EEE9FF;
+      --sage:       #3D6B35;
+      --sage-bg:    #EBF3EA;
+      --amber:      #A05C00;
+      --amber-bg:   #FFF3E0;
+      --dust:       #AAAAAA;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2rem 0 2.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: rise 0.6s ease forwards;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+
+    .brand-name {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--purple);
+    }
+
+    .brand-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+    }
+
+    .brand-page {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--sage);
+      letter-spacing: 0.04em;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sage);
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    .last-updated {
+      font-size: 0.75rem;
+      color: var(--dust);
+    }
+
+    .btn-refresh {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-refresh:hover { border-color: var(--purple); background: var(--purple-bg); color: var(--purple); }
+    .btn-refresh svg { transition: transform 0.3s; }
+    .btn-refresh.spinning svg { animation: spin 0.6s linear infinite; }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: rise 0.6s ease 0.1s forwards;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 1.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--dust);
+      margin-top: 0.35rem;
+    }
+
+    /* ── FLOW CARDS ── */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .flows-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: rise 0.6s ease 0.2s forwards;
+    }
+
+    .flow-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.82rem;
+    }
+
+    .flow-chip-name {
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .flow-chip-count {
+      background: var(--purple-bg);
+      color: var(--purple);
+      font-size: 0.7rem;
+      font-weight: 500;
+      border-radius: 100px;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .flow-chip-comp {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── CHART ── */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: rise 0.6s ease 0.25s forwards;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    canvas#chart {
+      width: 100%;
+      height: 180px;
+      display: block;
+    }
+
+    /* ── TABLE ── */
+    .table-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      opacity: 0;
+      animation: rise 0.6s ease 0.3s forwards;
+    }
+
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .table-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+    }
+
+    .table-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--ink);
+      background: var(--bg);
+      outline: none;
+      width: 200px;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--purple); background: var(--surface); }
+
+    .filter-select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--ink);
+      background: var(--bg);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .filter-select:focus { border-color: var(--purple); }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 0.7rem 1rem;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--ink); }
+    th.sort-asc::after  { content: ' ↑'; }
+    th.sort-desc::after { content: ' ↓'; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+
+    td {
+      padding: 0.8rem 1rem;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .td-name { font-weight: 500; }
+    .td-email { color: var(--muted); }
+    .td-mono { font-variant-numeric: tabular-nums; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+    .badge-complete { background: var(--sage-bg); color: var(--sage); }
+    .badge-started  { background: var(--amber-bg); color: var(--amber); }
+
+    .flow-tag {
+      display: inline-flex;
+      align-items: center;
+      background: var(--purple-bg);
+      color: var(--purple);
+      border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .table-footer {
+      padding: 0.85rem 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--dust);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── LOADING / ERROR ── */
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .error-banner {
+      background: #FFF5F5;
+      border: 1px solid #FFCDD2;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.82rem;
+      color: #B71C1C;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    /* ── SETUP NOTICE ── */
+    .setup-notice {
+      background: var(--amber-bg);
+      border: 1px solid #FFE0B2;
+      border-radius: 10px;
+      padding: 1.1rem 1.35rem;
+      font-size: 0.82rem;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .setup-notice strong { font-weight: 500; }
+    .setup-notice code {
+      background: rgba(0,0,0,0.07);
+      border-radius: 4px;
+      padding: 0.1em 0.35em;
+      font-size: 0.88em;
+    }
+
+    @media (max-width: 700px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .header-right .last-updated { display: none; }
+    }
+    @media (max-width: 480px) {
+      .stats-strip { grid-template-columns: 1fr 1fr; }
+      .page { padding: 0 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">TalkBack</span>
+      <div class="brand-sep"></div>
+      <span class="brand-page">Hub</span>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>Live</span>
+      </div>
+      <span class="last-updated" id="last-updated">Fetching data…</span>
+      <button class="btn-refresh" id="btn-refresh" onclick="refresh()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M10.5 6A4.5 4.5 0 1 1 6 1.5a4.5 4.5 0 0 1 3.182 1.318L10.5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M8 4.5h2.5V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="error-banner"></div>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-label">Total Participants</div>
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-sub" id="stat-total-sub">across all flows</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed Today</div>
+      <div class="stat-value" id="stat-today">—</div>
+      <div class="stat-sub" id="stat-today-sub">conversations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completion Rate</div>
+      <div class="stat-value" id="stat-rate">—</div>
+      <div class="stat-sub">started → finished</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Duration</div>
+      <div class="stat-value" id="stat-duration">—</div>
+      <div class="stat-sub">completed sessions</div>
+    </div>
+  </div>
+
+  <!-- Flow breakdown -->
+  <div class="section-label">Active Flows</div>
+  <div class="flows-row" id="flows-row">
+    <div class="loading-state"><div class="spinner"></div> Loading flows…</div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-section">
+    <div class="chart-header">
+      <div class="chart-title">Daily Participation</div>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#5118EE"></div>
+          Completed
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#D4C8FF"></div>
+          Started
+        </div>
+      </div>
+    </div>
+    <canvas id="chart" height="180"></canvas>
+  </div>
+
+  <!-- Table -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-title">Participants</div>
+      <div class="table-controls">
+        <input class="search-input" type="text" id="search" placeholder="Search name or email…" oninput="renderTable()">
+        <select class="filter-select" id="filter-flow" onchange="renderTable()">
+          <option value="">All flows</option>
+        </select>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="complete">Completed</option>
+          <option value="register">Started only</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')">Name</th>
+            <th onclick="sortBy('email')">Email</th>
+            <th onclick="sortBy('variant')">Flow</th>
+            <th onclick="sortBy('status')">Status</th>
+            <th onclick="sortBy('date')">Date</th>
+            <th onclick="sortBy('duration')">Duration</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div> Loading participants…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="table-count">—</span>
+      <span>Auto-refreshes every 30s</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://yufzlucfvoxgvdexzgsf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_q0TOBTuWKmV1DxSUn3clTg_76NNSfCa';
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let allRows    = [];
+let sortCol    = 'date';
+let sortDir    = -1; // -1 = desc, 1 = asc
+let refreshTimer;
+
+// ─────────────────────────────────────────────
+// FETCH
+// ─────────────────────────────────────────────
+async function fetchAll() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/sessions?select=*&order=created_at.desc&limit=2000`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) {
+      showError(`Could not load data (${res.status}). Check your Supabase RLS policies allow anon SELECT.`);
+      return [];
+    }
+    hideError();
+    return await res.json();
+  } catch (e) {
+    showError('Network error — could not reach Supabase.');
+    return [];
+  }
+}
+
+// ─────────────────────────────────────────────
+// REFRESH
+// ─────────────────────────────────────────────
+async function refresh() {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
+  try {
+    const rows = await fetchAll();
+    allRows = normalise(rows);
+    render();
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      'Updated ' + now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ─────────────────────────────────────────────
+// NORMALISE — Supabase rows (snake_case, one row per session)
+// ─────────────────────────────────────────────
+function normalise(rows) {
+  return rows.map(r => ({
+    name:     (r.first_name || '').trim() || '—',
+    email:    r.email    || '',
+    variant:  r.variant  || '',
+    status:   (r.action  || '').toLowerCase(),
+    date:     parseDate(r.created_at),
+    duration: parseNum(r.duration_s),
+    convId:   r.conversation_id || '',
+    device:   r.device  || '',
+    browser:  r.browser || '',
+  }));
+}
+
+function parseDate(val) {
+  if (!val) return null;
+  const d = new Date(val);
+  return isNaN(d) ? null : d;
+}
+
+function parseNum(val) {
+  const n = Number(val);
+  return isNaN(n) ? null : n;
+}
+
+// ─────────────────────────────────────────────
+// RENDER ALL
+// ─────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderFlows();
+  renderChart();
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+function renderStats() {
+  const completed = allRows.filter(r => r.status === 'complete');
+  const today     = todayRows(completed);
+  const total     = allRows.length;
+  const rate      = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+  const durations = completed.map(r => r.duration).filter(d => d !== null && d > 0);
+  const avgDur    = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
+
+  document.getElementById('stat-total').textContent    = total;
+  document.getElementById('stat-today').textContent    = today.length;
+  document.getElementById('stat-rate').textContent     = rate + '%';
+  document.getElementById('stat-duration').textContent = avgDur ? formatDuration(avgDur) : '—';
+
+  document.getElementById('stat-total-sub').textContent =
+    completed.length + ' completed, ' + (total - completed.length) + ' started';
+}
+
+function todayRows(rows) {
+  const today = new Date();
+  return rows.filter(r => {
+    if (!r.date) return false;
+    return r.date.toDateString() === today.toDateString();
+  });
+}
+
+function formatDuration(secs) {
+  if (secs < 60) return secs + 's';
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m + 'm ' + (s > 0 ? s + 's' : '');
+}
+
+// ─────────────────────────────────────────────
+// FLOWS
+// ─────────────────────────────────────────────
+function renderFlows() {
+  const variants = {};
+  for (const r of allRows) {
+    const v = r.variant || 'unknown';
+    if (!variants[v]) variants[v] = { started: 0, completed: 0 };
+    variants[v].started++;
+    if (r.status === 'complete') variants[v].completed++;
+  }
+
+  const container = document.getElementById('flows-row');
+
+  // Update filter select
+  const sel = document.getElementById('filter-flow');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All flows</option>';
+  Object.keys(variants).sort().forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = labelVariant(v);
+    if (v === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  if (Object.keys(variants).length === 0) {
+    container.innerHTML = '<div class="loading-state">No flow data yet.</div>';
+    return;
+  }
+
+  container.innerHTML = Object.entries(variants)
+    .sort(([,a],[,b]) => b.started - a.started)
+    .map(([v, d]) => `
+      <div class="flow-chip">
+        <span class="flow-chip-name">${labelVariant(v)}</span>
+        <span class="flow-chip-count">${d.started}</span>
+        <span class="flow-chip-comp">${d.completed} completed</span>
+      </div>
+    `).join('');
+}
+
+function labelVariant(v) {
+  const labels = {
+    kudos:              'Kudos',
+    'post-capture':     'Skout Organic',
+    skoutorganic:       'Skout Organic',
+    'skoutorganic-lapsed': 'Skout Lapsed',
+    withsmall:          'With Small',
+    yarntons:           "Yarnton's",
+    thebuildermarket:   'Builder Market',
+  };
+  return labels[v] || v;
+}
+
+// ─────────────────────────────────────────────
+// CHART — native Canvas bar chart
+// ─────────────────────────────────────────────
+function renderChart() {
+  const canvas  = document.getElementById('chart');
+  const ctx     = canvas.getContext('2d');
+  const dpr     = window.devicePixelRatio || 1;
+  const rect    = canvas.getBoundingClientRect();
+  canvas.width  = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width;
+  const H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Build last 14 days
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({
+      label:     d.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' }),
+      date:      d.toDateString(),
+      started:   0,
+      completed: 0,
+    });
+  }
+
+  for (const r of allRows) {
+    if (!r.date) continue;
+    const ds = r.date.toDateString();
+    const day = days.find(d => d.date === ds);
+    if (!day) continue;
+    day.started++;
+    if (r.status === 'complete') day.completed++;
+  }
+
+  const maxVal = Math.max(...days.map(d => d.started), 1);
+  const padLeft = 8, padRight = 8, padTop = 12, padBottom = 30;
+  const barW    = (W - padLeft - padRight) / days.length;
+  const chartH  = H - padTop - padBottom;
+
+  // Grid lines
+  ctx.strokeStyle = '#E8E8E8';
+  ctx.lineWidth   = 1;
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = padTop + chartH * (1 - f);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(W - padRight, y);
+    ctx.stroke();
+  });
+
+  // Bars
+  days.forEach((day, i) => {
+    const x = padLeft + i * barW;
+    const bw = barW * 0.55;
+    const bx = x + (barW - bw) / 2;
+
+    // Started (background)
+    if (day.started > 0) {
+      const bh = (day.started / maxVal) * chartH;
+      const by = padTop + chartH - bh;
+      ctx.fillStyle = '#D4C8FF';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, [3, 3, 0, 0]);
+      ctx.fill();
+    }
+
+    // Completed (foreground)
+    if (day.completed > 0) {
+      const bh = (day.completed / maxVal) * chartH;
+      const by = padTop + chartH - bh;
+      ctx.fillStyle = '#5118EE';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, [3, 3, 0, 0]);
+      ctx.fill();
+    }
+
+    // Label (every 2nd)
+    if (i % 2 === 0 || i === days.length - 1) {
+      ctx.fillStyle   = '#AAAAAA';
+      ctx.font        = '10px DM Sans, sans-serif';
+      ctx.textAlign   = 'center';
+      ctx.fillText(day.label, x + barW / 2, H - 8);
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// TABLE
+// ─────────────────────────────────────────────
+function sortBy(col) {
+  if (sortCol === col) { sortDir *= -1; }
+  else { sortCol = col; sortDir = -1; }
+  // Update header classes
+  document.querySelectorAll('th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+  });
+  document.querySelectorAll('th').forEach(th => {
+    if (th.getAttribute('onclick') === `sortBy('${col}')`) {
+      th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+    }
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const query  = document.getElementById('search').value.toLowerCase();
+  const flow   = document.getElementById('filter-flow').value;
+  const status = document.getElementById('filter-status').value;
+
+  let rows = allRows.filter(r => {
+    if (flow && r.variant !== flow) return false;
+    if (status && r.status !== status) return false;
+    if (query) {
+      const haystack = `${r.name} ${r.email}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  rows = rows.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av instanceof Date && bv instanceof Date) return (av - bv) * sortDir;
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sortDir;
+    av = String(av || ''); bv = String(bv || '');
+    return av.localeCompare(bv) * sortDir;
+  });
+
+  const tbody = document.getElementById('table-body');
+  document.getElementById('table-count').textContent =
+    rows.length === allRows.length
+      ? `${rows.length} participant${rows.length !== 1 ? 's' : ''}`
+      : `${rows.length} of ${allRows.length} shown`;
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="table-empty">${allRows.length === 0 ? 'No data yet. Participants will appear here as they go through a flow.' : 'No results match your filters.'}</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="td-name">${esc(r.name)}</td>
+      <td class="td-email">${esc(r.email) || '<span style="color:var(--dust)">—</span>'}</td>
+      <td><span class="flow-tag">${esc(labelVariant(r.variant))}</span></td>
+      <td>${r.status === 'complete'
+        ? '<span class="badge badge-complete">Completed</span>'
+        : '<span class="badge badge-started">Started</span>'
+      }</td>
+      <td class="td-mono">${r.date ? r.date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+      <td class="td-mono">${r.duration ? formatDuration(r.duration) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────
+// ERROR
+// ─────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('error-banner').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+refresh();
+refreshTimer = setInterval(refresh, 30_000);
+
+// Re-draw chart on resize
+window.addEventListener('resize', () => {
+  if (allRows.length > 0) renderChart();
+});
+</script>
+</body>
+</html>

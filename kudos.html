@@ -594,7 +594,8 @@
   import { Conversation } from 'https://cdn.jsdelivr.net/npm/@11labs/client@latest/+esm';
 
   const AGENT_ID        = 'agent_5501kka39vpdf7raf1tenz16h61n';
-  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwL8nX-C_w07bh96qhXpNeQRYrU7nG_xFyn6nHt25uVcU7K29BwqGG8qK2nCxWcZrQMLQ/exec';
+  const SUPABASE_URL = 'https://yufzlucfvoxgvdexzgsf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_q0TOBTuWKmV1DxSUn3clTg_76NNSfCa';
 
   const VARIANT = 'kudos';
 
@@ -636,13 +637,39 @@
   }
 
   async function sheetsWrite(payload) {
+    const headers = {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type':  'application/json',
+    };
     try {
-      await fetch(SHEETS_ENDPOINT, {
-        method:  'POST',
-        mode:    'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload)
-      });
+      if (payload.action === 'register') {
+        const body = { session_id: payload.sessionId };
+        if (payload.timestamp) body.created_at = payload.timestamp;
+        if (payload.variant)   body.variant    = payload.variant;
+        if (payload.device)    body.device     = payload.device;
+        if (payload.browser)   body.browser    = payload.browser;
+        if (payload.pageUrl)   body.page_url   = payload.pageUrl;
+        if (payload.firstName) body.first_name = payload.firstName;
+        if (payload.email)     body.email      = payload.email;
+        body.updated_at = new Date().toISOString();
+        await fetch(`${SUPABASE_URL}/rest/v1/sessions?on_conflict=session_id`, {
+          method:  'POST',
+          headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+          body:    JSON.stringify(body),
+        });
+      } else if (payload.action === 'complete') {
+        const body = { action: 'complete', updated_at: new Date().toISOString() };
+        if (payload.conversationId)  body.conversation_id = payload.conversationId;
+        if (payload.duration != null) body.duration_s    = payload.duration;
+        if (payload.transcript)      body.transcript     = payload.transcript;
+        if (payload.edited)          body.edited         = true;
+        await fetch(`${SUPABASE_URL}/rest/v1/sessions?session_id=eq.${encodeURIComponent(payload.sessionId)}`, {
+          method:  'PATCH',
+          headers,
+          body:    JSON.stringify(body),
+        });
+      }
     } catch (err) {
       console.warn('Sheets write failed:', err);
     }
