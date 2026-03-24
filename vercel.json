@@ -7,6 +7,8 @@
     { "source": "/kudos",                "destination": "/kudos.html" },
     { "source": "/withsmall",            "destination": "/withsmall.html" },
     { "source": "/yarntons",             "destination": "/yarntons.html" },
-    { "source": "/thebuildermarket",    "destination": "/thebuildermarket.html" }
+    { "source": "/thebuildermarket",    "destination": "/thebuildermarket.html" },
+    { "source": "/therave-a",           "destination": "/therave-a.html" },
+    { "source": "/therave-b",           "destination": "/therave-b.html" }
   ]
 }
