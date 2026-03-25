@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TalkBack — ElevenLabs → Supabase Migration</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #F7F3EE; --ink: #1A1612; --sage: #4A6741;
+      --dust: #C9BFB3; --warm: #E8DDD4; --error: #9B5050;
+      --purple: #5118EE; --purple-bg: #EEE9FF;
+    }
+    html, body {
+      background: var(--cream); color: var(--ink);
+      font-family: 'DM Sans', sans-serif; font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .wrap { max-width: 640px; width: 100%; }
+    .brand { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+    .brand-name { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); font-weight: 500; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .subline { font-size: 0.92rem; color: #6B5F55; line-height: 1.65; margin-bottom: 2rem; }
+    .field { margin-bottom: 1.25rem; }
+    .field label { display: block; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8A7D74; font-weight: 500; margin-bottom: 0.35rem; }
+    .field input { width: 100%; background: white; border: 1px solid var(--warm); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; }
+    .field input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(74,103,65,0.08); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; background: var(--ink); color: var(--cream); border: none; border-radius: 100px; padding: 1rem 2rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn:hover:not(:disabled) { background: var(--sage); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .log-wrap { margin-top: 2rem; background: white; border: 1px solid var(--warm); border-radius: 10px; padding: 1rem; max-height: 400px; overflow-y: auto; display: none; }
+    .log-wrap.visible { display: block; }
+    .log-line { font-size: 0.78rem; line-height: 1.6; padding: 0.15rem 0; font-family: 'DM Sans', monospace; }
+    .log-line.ok { color: var(--sage); }
+    .log-line.err { color: var(--error); }
+    .log-line.info { color: #6B5F55; }
+    .log-line.highlight { color: var(--purple); font-weight: 500; }
+    .progress { margin-top: 1rem; height: 4px; background: var(--warm); border-radius: 2px; overflow: hidden; display: none; }
+    .progress.visible { display: block; }
+    .progress-bar { height: 100%; background: var(--sage); border-radius: 2px; transition: width 0.3s ease; width: 0%; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-name">TalkBack Migration</span>
+  </div>
+
+  <h1>ElevenLabs → Supabase</h1>
+  <p class="subline">This tool pulls every conversation from your ElevenLabs agents and writes them into the Supabase sessions table. You'll need your ElevenLabs API key — create a new one at Settings → API Keys if needed.</p>
+
+  <div class="field">
+    <label>ElevenLabs API Key</label>
+    <input id="api-key" type="password" placeholder="sk_..." />
+  </div>
+
+  <button class="btn" id="btn-run" onclick="runMigration()">Run Migration</button>
+
+  <div class="progress" id="progress"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="log-wrap" id="log"></div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://yufzlucfvoxgvdexzgsf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_q0TOBTuWKmV1DxSUn3clTg_76NNSfCa';
+
+  // Map ElevenLabs agent IDs to TalkBack variant tags
+  const AGENT_VARIANT_MAP = {
+    'agent_1001kh4fjj6hfdkv25v56yeksgzc': 'post-capture',
+    'agent_5601kjzmxaqbevxth4jk6nzx66ga': 'lapsed',
+    'agent_5501kka39vpdf7raf1tenz16h61n': 'kudos',
+    'agent_3501kkdgk77yf1jsyxa1jbe53vdp': 'withsmall',
+    'agent_5201km18ecpsfsyry9jp5c2p5589': 'yarntons',
+    'agent_9901km240n30e4ss8pxe2bwxaawf': 'thebuildermarket',
+    'agent_6301kmeearv4eqp8rsp9dt2t2rrm': 'therave-a',
+    'agent_6601kmef637gfpc96y2eb5ftew2p': 'therave-b',
+  };
+
+  const AGENT_LABEL_MAP = {
+    'post-capture': 'Skout',
+    'lapsed': 'Skout',
+    'kudos': 'TalkBack',
+    'withsmall': 'with small.',
+    'yarntons': "Yarnton's",
+    'thebuildermarket': 'TheBuilderMarket',
+    'therave-a': 'The Rave (A)',
+    'therave-b': 'The Rave (B)',
+  };
+
+  function log(msg, cls = 'info') {
+    const el = document.getElementById('log');
+    el.classList.add('visible');
+    const line = document.createElement('div');
+    line.className = 'log-line ' + cls;
+    line.textContent = msg;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setProgress(pct) {
+    const bar = document.getElementById('progress-bar');
+    const wrap = document.getElementById('progress');
+    wrap.classList.add('visible');
+    bar.style.width = pct + '%';
+  }
+
+  async function runMigration() {
+    const apiKey = document.getElementById('api-key').value.trim();
+    if (!apiKey) { alert('Please enter your ElevenLabs API key'); return; }
+
+    const btn = document.getElementById('btn-run');
+    btn.disabled = true;
+    btn.textContent = 'Running…';
+
+    log('Starting migration…', 'highlight');
+
+    // Step 1: Fetch all conversations (paginated)
+    let allConversations = [];
+    let cursor = null;
+    let page = 0;
+
+    try {
+      while (true) {
+        page++;
+        let url = `https://api.elevenlabs.io/v1/convai/conversations?page_size=100`;
+        if (cursor) url += `&cursor=${cursor}`;
+
+        log(`Fetching conversation list (page ${page})…`);
+        const res = await fetch(url, {
+          headers: { 'xi-api-key': apiKey }
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          log(`ERROR: ElevenLabs API returned ${res.status}: ${errText}`, 'err');
+          btn.disabled = false;
+          btn.textContent = 'Run Migration';
+          return;
+        }
+
+        const data = await res.json();
+        const convos = data.conversations || [];
+        allConversations = allConversations.concat(convos);
+        log(`  Got ${convos.length} conversations (${allConversations.length} total)`);
+
+        if (!data.has_more || !data.next_cursor) break;
+        cursor = data.next_cursor;
+      }
+    } catch (e) {
+      log(`Network error fetching conversations: ${e.message}`, 'err');
+      btn.disabled = false;
+      btn.textContent = 'Run Migration';
+      return;
+    }
+
+    log(`Found ${allConversations.length} total conversations`, 'highlight');
+
+    // Step 2: For each conversation, fetch full details + transcript, then write to Supabase
+    let written = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    for (let i = 0; i < allConversations.length; i++) {
+      const conv = allConversations[i];
+      const convId = conv.conversation_id;
+      const pct = Math.round(((i + 1) / allConversations.length) * 100);
+      setProgress(pct);
+
+      try {
+        // Fetch full conversation detail (includes transcript)
+        const detailRes = await fetch(
+          `https://api.elevenlabs.io/v1/convai/conversations/${convId}`,
+          { headers: { 'xi-api-key': apiKey } }
+        );
+
+        if (!detailRes.ok) {
+          log(`  ⚠ Could not fetch ${convId}: ${detailRes.status}`, 'err');
+          errors++;
+          continue;
+        }
+
+        const detail = await detailRes.json();
+
+        // Extract transcript
+        const transcript = (detail.transcript || [])
+          .map(t => {
+            const role = t.role === 'agent' ? 'Agent' : 'You';
+            return `${role}: ${t.message || t.content || ''}`;
+          })
+          .join('\n');
+
+        // Determine variant from agent_id
+        const variant = AGENT_VARIANT_MAP[detail.agent_id] || 'unknown';
+        const agentLabel = AGENT_LABEL_MAP[variant] || 'Agent';
+
+        // Calculate duration in seconds
+        const durationSecs = detail.metadata?.call_duration_secs
+          || detail.call_duration_secs
+          || conv.call_duration_secs
+          || null;
+
+        // Build session record
+        const sessionId = `el_${convId}`;
+        const record = {
+          session_id: sessionId,
+          action: 'complete',
+          variant: variant,
+          conversation_id: convId,
+          duration_s: durationSecs ? Math.round(durationSecs) : null,
+          transcript: transcript || null,
+          created_at: detail.start_time || conv.start_time || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Write to Supabase (upsert by session_id)
+        const sbRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/sessions?on_conflict=session_id`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(record)
+          }
+        );
+
+        if (sbRes.ok || sbRes.status === 201) {
+          written++;
+          log(`  ✓ ${i + 1}/${allConversations.length} — ${variant} (${convId.slice(0,12)}…) — ${durationSecs ? Math.round(durationSecs) + 's' : 'no duration'}`, 'ok');
+        } else {
+          const sbErr = await sbRes.text();
+          log(`  ⚠ Supabase error for ${convId}: ${sbRes.status} ${sbErr}`, 'err');
+          errors++;
+        }
+
+      } catch (e) {
+        log(`  ⚠ Error processing ${convId}: ${e.message}`, 'err');
+        errors++;
+      }
+
+      // Small delay to avoid rate limits
+      if (i % 5 === 4) await new Promise(r => setTimeout(r, 200));
+    }
+
+    setProgress(100);
+    log('', 'info');
+    log(`Migration complete!`, 'highlight');
+    log(`  ✓ ${written} conversations written to Supabase`, 'ok');
+    if (skipped > 0) log(`  → ${skipped} skipped (already existed)`, 'info');
+    if (errors > 0) log(`  ⚠ ${errors} errors`, 'err');
+    log(`Your dashboard at /dashboard will now show all historical data.`, 'highlight');
+
+    btn.textContent = 'Done!';
+  }
+</script>
+</body>
+</html>

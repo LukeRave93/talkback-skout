@@ -430,6 +430,85 @@
       font-size: 0.88rem;
     }
 
+    .btn-transcript {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--purple);
+      background: rgba(124,58,237,0.08);
+      border: none;
+      border-radius: 6px;
+      padding: 0.25rem 0.65rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-transcript:hover { background: rgba(124,58,237,0.16); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+
+    .modal-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .modal-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.1rem 0.3rem;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      flex: 1;
+    }
+
     .table-footer {
       padding: 0.85rem 1.5rem;
       border-top: 1px solid var(--border);
@@ -587,6 +666,12 @@
         <select class="filter-select" id="filter-flow" onchange="renderTable()">
           <option value="">All flows</option>
         </select>
+        <button class="btn-refresh" onclick="exportCSV()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
         <select class="filter-select" id="filter-status" onchange="renderTable()">
           <option value="">All statuses</option>
           <option value="complete">Completed</option>
@@ -604,6 +689,7 @@
             <th onclick="sortBy('status')">Status</th>
             <th onclick="sortBy('date')">Date</th>
             <th onclick="sortBy('duration')">Duration</th>
+            <th>Transcript</th>
           </tr>
         </thead>
         <tbody id="table-body">
@@ -617,6 +703,20 @@
     </div>
   </div>
 
+</div>
+
+<!-- Transcript Modal -->
+<div id="transcript-modal" class="modal-overlay" onclick="if(event.target===this)closeTranscript()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-name" id="modal-name"></div>
+        <div class="modal-meta"><span id="modal-flow"></span> &nbsp;·&nbsp; <span id="modal-date"></span></div>
+      </div>
+      <button class="modal-close" onclick="closeTranscript()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
 </div>
 
 <script>
@@ -684,9 +784,10 @@ function normalise(rows) {
     status:   (r.action  || '').toLowerCase(),
     date:     parseDate(r.created_at),
     duration: parseNum(r.duration_s),
-    convId:   r.conversation_id || '',
-    device:   r.device  || '',
-    browser:  r.browser || '',
+    convId:     r.conversation_id || '',
+    device:     r.device     || '',
+    browser:    r.browser    || '',
+    transcript: r.transcript || '',
   }));
 }
 
@@ -940,11 +1041,11 @@ function renderTable() {
       : `${rows.length} of ${allRows.length} shown`;
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="table-empty">${allRows.length === 0 ? 'No data yet. Participants will appear here as they go through a flow.' : 'No results match your filters.'}</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="table-empty">${allRows.length === 0 ? 'No data yet. Participants will appear here as they go through a flow.' : 'No results match your filters.'}</div></td></tr>`;
     return;
   }
 
-  tbody.innerHTML = rows.map(r => `
+  tbody.innerHTML = rows.map((r, i) => `
     <tr>
       <td class="td-name">${esc(r.name)}</td>
       <td class="td-email">${esc(r.email) || '<span style="color:var(--dust)">—</span>'}</td>
@@ -955,8 +1056,27 @@ function renderTable() {
       }</td>
       <td class="td-mono">${r.date ? r.date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
       <td class="td-mono">${r.duration ? formatDuration(r.duration) : '—'}</td>
+      <td>${r.transcript
+        ? `<button class="btn-transcript" onclick="openTranscript(${i})">View</button>`
+        : '<span style="color:var(--dust)">—</span>'
+      }</td>
     </tr>
   `).join('');
+}
+
+function openTranscript(i) {
+  const r = allRows[i];
+  document.getElementById('modal-name').textContent    = r.name + (r.email ? ' · ' + r.email : '');
+  document.getElementById('modal-flow').textContent    = labelVariant(r.variant);
+  document.getElementById('modal-date').textContent    = r.date ? r.date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+  document.getElementById('modal-body').textContent    = r.transcript;
+  document.getElementById('transcript-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTranscript() {
+  document.getElementById('transcript-modal').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function esc(s) {
@@ -984,6 +1104,41 @@ refreshTimer = setInterval(refresh, 30_000);
 // Re-draw chart on resize
 window.addEventListener('resize', () => {
   if (allRows.length > 0) renderChart();
+});
+
+// ─────────────────────────────────────────────
+// EXPORT CSV
+// ─────────────────────────────────────────────
+function exportCSV() {
+  const cols = ['Name', 'Email', 'Flow', 'Status', 'Date', 'Duration (s)', 'Conversation ID', 'Transcript'];
+  const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
+  const rows = [
+    cols.map(escape).join(','),
+    ...allRows.map(r => [
+      r.name,
+      r.email,
+      labelVariant(r.variant),
+      r.status,
+      r.date ? r.date.toISOString() : '',
+      r.duration ?? '',
+      r.convId,
+      r.transcript,
+    ].map(escape).join(','))
+  ];
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `talkback-participants-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeTranscript();
 });
 </script>
 </body>
