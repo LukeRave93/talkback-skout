@@ -9,6 +9,7 @@
     { "source": "/yarntons",             "destination": "/yarntons.html" },
     { "source": "/thebuildermarket",    "destination": "/thebuildermarket.html" },
     { "source": "/therave-a",           "destination": "/therave-a.html" },
-    { "source": "/therave-b",           "destination": "/therave-b.html" }
+    { "source": "/therave-b",           "destination": "/therave-b.html" },
+    { "source": "/therave-c",           "destination": "/therave-c.html" }
   ]
 }
