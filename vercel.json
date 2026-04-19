@@ -5,12 +5,14 @@
     { "source": "/skoutorganic",         "destination": "/skoutorganic.html" },
     { "source": "/skoutorganic-lapsed",  "destination": "/skoutorganic-lapsed.html" },
     { "source": "/kudos",                "destination": "/kudos.html" },
+    { "source": "/withsmall-churned",    "destination": "/withsmall-churned.html" },
+    { "source": "/withsmall-lapsed",     "destination": "/withsmall-lapsed.html" },
     { "source": "/withsmall",            "destination": "/withsmall.html" },
     { "source": "/yarntons",             "destination": "/yarntons.html" },
-    { "source": "/thebuildermarket",    "destination": "/thebuildermarket.html" },
-    { "source": "/therave-a",           "destination": "/therave-a.html" },
-    { "source": "/therave-b",           "destination": "/therave-b.html" },
-    { "source": "/therave-c",           "destination": "/therave-c.html" },
-    { "source": "/reckon",              "destination": "/reckon.html" }
+    { "source": "/thebuildermarket",     "destination": "/thebuildermarket.html" },
+    { "source": "/therave-a",            "destination": "/therave-a.html" },
+    { "source": "/therave-b",            "destination": "/therave-b.html" },
+    { "source": "/therave-c",            "destination": "/therave-c.html" },
+    { "source": "/reckon",               "destination": "/reckon.html" }
   ]
 }
