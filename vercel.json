@@ -15,6 +15,7 @@
     { "source": "/therave-c",            "destination": "/therave-c.html" },
     { "source": "/reckon",               "destination": "/reckon.html" },
     { "source": "/pawse",                "destination": "/pawse.html" },
-    { "source": "/bespokepost",          "destination": "/bespokepost.html" }
+    { "source": "/bespokepost",          "destination": "/bespokepost.html" },
+    { "source": "/nzcreatine",           "destination": "/nzcreatine.html" }
   ]
 }
