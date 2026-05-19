@@ -124,6 +124,14 @@
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
     .btn-primary:hover:not(:disabled) svg { transform: translateX(2px); }
+    .disclaimer {
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--dust);
+      max-width: 360px;
+      margin: 1.75rem auto 0;
+    }
+
     .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
 
     /* ── ACTIVE ── */
@@ -476,13 +484,13 @@
 
   <div class="brand">
     <div class="brand-dot"></div>
-    <span class="brand-name">NZ Creatine × TalkBack</span>
+    <span class="brand-name">Creatine Research</span>
   </div>
 
   <!-- STEP 1: Landing — no gate, direct start -->
   <div id="state-landing" class="state active">
-    <h1 class="headline">Tell us about your <em>creatine experience.</em></h1>
-    <p class="subline">Two minutes, no typing. Just a quick voice chat about what you thought of the launch. We'll send you something for your time.</p>
+    <h1 class="headline">Help us understand your <em>creatine usage.</em></h1>
+    <p class="subline">Two young guys are launching a creatine brand in NZ and need your honest input. Two minutes, no typing — and many participants will get to try the product before it launches.</p>
 
     <button class="btn-primary" id="btn-start">
       Start talking
@@ -490,7 +498,9 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
       </svg>
     </button>
-    <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; Reward on completion</p>
+    <p class="note">~2 minutes &nbsp;·&nbsp; Voice only &nbsp;·&nbsp; NZ-made product</p>
+
+    <p class="disclaimer"><em>You'll be speaking with an AI agent. The conversation will be recorded and used for research purposes only.</em></p>
   </div>
 
   <!-- STEP 2: Active conversation -->
@@ -524,12 +534,12 @@
   <!-- STEP 3: Post-conversation capture -->
   <div id="state-capture" class="state">
     <p class="capture-eyebrow">Conversation complete</p>
-    <h2 class="capture-headline">Where should we send your $10 Uber Eats gift card?</h2>
-    <p class="capture-subline">Drop your details below and we'll send it within 24 hours.</p>
+    <h2 class="capture-headline">Leave your details and we'll keep you posted.</h2>
+    <p class="capture-subline">We'll let you know when the product is ready — and many participants will get to try it first.</p>
 
     <div class="reward-badge">
-      <div class="reward-badge-icon">🎁</div>
-      $10 Uber Eats gift card
+      <div class="reward-badge-icon">🧪</div>
+      Early access to try the product
     </div>
 
     <div class="fields">
@@ -551,7 +561,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
       </svg>
     </button>
-    <p class="note">No spam, ever &nbsp;·&nbsp; Only used to deliver your reward</p>
+    <p class="note">No spam, ever &nbsp;·&nbsp; Only used to follow up on your participation</p>
   </div>
 
   <!-- STEP 4: Done -->
@@ -559,10 +569,9 @@
 
     <div class="done-header">
       <p class="done-eyebrow">You're all set</p>
-      <h2 class="done-headline">Thanks <span id="done-name"></span>, your reward is on its way.</h2>
+      <h2 class="done-headline">Thanks <span id="done-name"></span>, you're on the list.</h2>
       <p class="done-body">
-        Our team are reviewing the conversation — this typically takes 24 hours or less.
-        We'll send your $10 Uber Eats gift card to <strong id="done-email"></strong> as soon as it's been reviewed.
+        Your feedback goes directly to the founders. We'll be in touch at <strong id="done-email"></strong> once the product clears its final tests — and you'll be first to know if you're selected to try it.
       </p>
     </div>
 
