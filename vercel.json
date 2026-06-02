@@ -7,6 +7,7 @@
     { "source": "/kudos",                "destination": "/kudos.html" },
     { "source": "/withsmall-churned",    "destination": "/withsmall-churned.html" },
     { "source": "/withsmall-lapsed",     "destination": "/withsmall-lapsed.html" },
+    { "source": "/withsmall-v2",         "destination": "/withsmall-v2.html" },
     { "source": "/withsmall",            "destination": "/withsmall.html" },
     { "source": "/yarntons",             "destination": "/yarntons.html" },
     { "source": "/thebuildermarket",     "destination": "/thebuildermarket.html" },

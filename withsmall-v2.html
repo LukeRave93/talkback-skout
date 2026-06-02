@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>with small. × Telltale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white:   #FFFFFF;
+      --ink:     #111111;
+      --dust:    #AAAAAA;
+      --border:  #E5E5E5;
+      --muted:   #666666;
+      --paper:   #F7F5F2;
+      --reward-bg:   #EAF3DE;
+      --reward-ink:  #27500A;
+    }
+
+    html, body {
+      background: var(--white);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 2rem 4.5rem;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2.25rem;
+      opacity: 0;
+      animation: rise 0.7s ease forwards;
+    }
+
+    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+
+    .brand-name {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* ── shared reward elements ── */
+    .reward-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--reward-bg);
+      color: var(--reward-ink);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      padding: 0.45rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.4rem;
+    }
+    .reward-pill svg { flex-shrink: 0; }
+
+    .reward-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--reward-ink);
+      background: var(--reward-bg);
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .reward-chip svg { flex-shrink: 0; }
+
+    /* ── LANDING ── */
+    #state-landing { opacity: 0; animation: rise 0.7s ease 0.15s forwards; }
+
+    .headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.9rem, 6vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+    }
+
+    .headline em { font-style: italic; color: var(--ink); }
+
+    .subline {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* preview — "here's how it opens" */
+    .preview {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem 1.1rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    .preview-label {
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+      font-weight: 500;
+      margin-bottom: 0.7rem;
+    }
+    .preview-row { display: flex; gap: 0.6rem; align-items: flex-start; }
+    .preview-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .preview-avatar svg { color: var(--white); }
+    .preview-bubble {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .preview-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; padding-left: 2.1rem; }
+    .preview-chip {
+      font-size: 0.68rem;
+      color: var(--muted);
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    .trust {
+      display: flex;
+      gap: 1.1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.6rem;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+    .trust span { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .trust svg { color: var(--dust); flex-shrink: 0; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: 100px;
+      padding: 1rem 2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      outline: none;
+      width: 100%;
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.8; transform: translateY(-1px); }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary svg { transition: transform 0.2s ease; flex-shrink: 0; }
+    .btn-primary:hover:not(:disabled) svg { transform: translateX(2px); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.9rem 2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      outline: none;
+      width: 100%;
+    }
+    .btn-secondary:hover { border-color: var(--ink); transform: translateY(-1px); }
+    .btn-secondary svg { flex-shrink: 0; color: var(--muted); }
+
+    .note { margin-top: 1.25rem; font-size: 0.78rem; color: var(--dust); }
+    .micro { margin-top: 0.7rem; font-size: 0.74rem; color: var(--dust); }
+    .micro b { color: var(--muted); font-weight: 500; }
+
+    /* ── READY (choose voice or type) ── */
+    #state-ready { opacity: 0; animation: rise 0.6s ease forwards; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.6rem;
+    }
+    .back-link {
+      font-size: 0.78rem; color: var(--muted);
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; padding: 0; outline: none;
+    }
+    .back-link:hover { color: var(--ink); }
+    .progress-dots { display: flex; gap: 0.3rem; }
+    .progress-dots div { width: 20px; height: 3px; background: var(--ink); border-radius: 2px; }
+    .progress-dots div.dim { background: var(--border); }
+
+    .lead {
+      font-size: 0.95rem; line-height: 1.6;
+      color: var(--muted); margin: 0 auto 1.5rem;
+      max-width: 360px;
+    }
+
+    .tips {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.6rem;
+      text-align: left;
+    }
+    .tip { display: flex; gap: 0.7rem; align-items: flex-start; }
+    .tip + .tip { margin-top: 0.8rem; }
+    .tip svg { color: var(--muted); margin-top: 1px; flex-shrink: 0; }
+    .tip p { font-size: 0.82rem; line-height: 1.55; margin: 0; color: var(--muted); }
+
+    .or-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.1rem 0; }
+    .or-divider div { flex: 1; height: 1px; background: var(--border); }
+    .or-divider span { font-size: 0.74rem; color: var(--dust); }
+
+    /* ── ACTIVE (voice) ── */
+    #state-active { opacity: 0; animation: rise 0.5s ease forwards; }
+
+    .mic-wrap {
+      width: 96px; height: 96px;
+      margin: 0 auto 2rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--ink);
+      opacity: 0;
+      width: 96px; height: 96px;
+    }
+
+    .ring-1 { animation: ripple 2.4s ease-out infinite; }
+    .ring-2 { animation: ripple 2.4s ease-out infinite 0.8s; }
+    .ring-3 { animation: ripple 2.4s ease-out infinite 1.6s; }
+
+    .mic-wrap.agent-speaking .ring { background: var(--dust); }
+
+    .mic-btn {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease;
+      outline: none;
+      transform-origin: center center;
+    }
+
+    .mic-btn:hover { opacity: 0.75; }
+    .mic-btn.muted { background: var(--dust); }
+    .mic-btn svg { color: white; pointer-events: none; }
+
+    .mic-btn.ending {
+      animation: mic-farewell 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    @keyframes mic-farewell {
+      0%   { transform: scale(1)    rotate(0deg);   background: var(--ink); }
+      30%  { transform: scale(1)    rotate(180deg); background: var(--ink); }
+      60%  { transform: scale(1.5)  rotate(320deg); background: var(--ink); }
+      80%  { transform: scale(1.65) rotate(355deg); background: var(--ink); }
+      90%  { transform: scale(0.8)  rotate(360deg); background: var(--ink); }
+      100% { transform: scale(0)    rotate(360deg); background: var(--ink); opacity: 0; }
+    }
+
+    .mic-wrap.ending .ring { animation: none; opacity: 0; transition: opacity 0.3s ease; }
+
+    .status-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 500;
+      margin-bottom: 0.6rem;
+      transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    .status-label.speaking { color: var(--muted); }
+    .status-label.ending   { opacity: 0; }
+
+    .active-headline { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+    .transcript-wrap {
+      margin-top: 1.75rem;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .transcript-wrap::-webkit-scrollbar { width: 3px; }
+    .transcript-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .transcript-line {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin-bottom: 0.6rem;
+      opacity: 0;
+      animation: rise 0.3s ease forwards;
+      padding-left: 0.75rem;
+      border-left: 2px solid transparent;
+    }
+
+    .transcript-line.agent { color: var(--ink); border-left-color: var(--ink); font-weight: 400; }
+    .transcript-line.user  { color: var(--muted); border-left-color: var(--border); }
+
+    .transcript-speaker {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 0.1rem;
+    }
+
+    .agent .transcript-speaker { color: var(--ink); }
+    .user  .transcript-speaker { color: var(--dust); }
+
+    .btn-end {
+      margin-top: 2rem;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.6rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, opacity 0.3s ease;
+      outline: none;
+    }
+
+    .btn-end:hover { border-color: var(--ink); color: var(--ink); }
+    .btn-end.ending { opacity: 0; pointer-events: none; }
+
+    .timer {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--dust);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.5rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .timer.ending { opacity: 0; }
+
+    /* ── TEXT (typed conversation) ── */
+    #state-text { opacity: 0; animation: rise 0.5s ease forwards; }
+
+    .chat-status {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 1.1rem;
+      min-height: 1rem;
+    }
+
+    .chat {
+      text-align: left;
+      max-height: 46vh;
+      min-height: 140px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 0.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .chat::-webkit-scrollbar { width: 3px; }
+    .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .chat-msg {
+      max-width: 85%;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      padding: 0.6rem 0.85rem;
+      border-radius: 14px;
+      opacity: 0;
+      animation: rise 0.3s ease forwards;
+    }
+    .chat-msg.agent {
+      align-self: flex-start;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--ink);
+      color: var(--white);
+      font-weight: 400;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: var(--white);
+    }
+    .chat-input-wrap:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17,17,17,0.06); }
+
+    .chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      line-height: 1.5;
+      color: var(--ink);
+      max-height: 120px;
+      padding: 0.35rem 0;
+    }
+    .chat-input::placeholder { color: var(--dust); }
+
+    .btn-send {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.2s ease;
+      outline: none;
+    }
+    .btn-send svg { color: var(--white); }
+    .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-send:not(:disabled):hover { opacity: 0.8; }
+
+    .text-footer-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .switch-link {
+      font-size: 0.74rem; color: var(--muted);
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 0.3rem;
+      outline: none; padding: 0;
+    }
+    .switch-link:hover { color: var(--ink); }
+    .switch-link svg { color: var(--dust); }
+
+    /* ── CAPTURE ── */
+    #state-capture { opacity: 0; animation: rise 0.6s ease forwards; }
+
+    .capture-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .capture-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .capture-subline {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 360px;
+      margin: 0 auto 1.75rem;
+    }
+
+    .reward-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--reward-bg);
+      border: none;
+      border-radius: 100px;
+      padding: 0.5rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--reward-ink);
+      margin-bottom: 2rem;
+      letter-spacing: 0.01em;
+    }
+    .reward-badge svg { flex-shrink: 0; }
+
+    .fields { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; text-align: left; }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .field label {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .field input {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+    }
+
+    .field input::placeholder { color: var(--dust); }
+    .field input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17,17,17,0.06); }
+    .field input.invalid { border-color: var(--ink); }
+    .field-error { font-size: 0.72rem; color: var(--ink); display: none; }
+    .field-error.visible { display: block; }
+
+    /* ── DONE ── */
+    #state-done { opacity: 0; animation: rise 0.6s ease forwards; }
+
+    .done-header { margin-bottom: 2rem; }
+
+    .done-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .done-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+
+    .done-body {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .divider { width: 32px; height: 1px; background: var(--border); margin: 2rem auto; }
+
+    .transcript-section { text-align: left; }
+
+    .transcript-section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .edit-hint {
+      font-size: 0.68rem;
+      color: var(--dust);
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-weight: 300;
+    }
+
+    .transcript-editable {
+      width: 100%;
+      min-height: 200px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: var(--ink);
+      font-weight: 300;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .transcript-editable:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(17,17,17,0.06);
+    }
+
+    .btn-save {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px solid var(--ink);
+      border-radius: 100px;
+      padding: 0.6rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      outline: none;
+    }
+
+    .btn-save:hover { background: var(--ink); color: white; }
+    .btn-save.saved { background: var(--ink); color: white; pointer-events: none; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ripple {
+      0%   { transform: scale(1);   opacity: 0.12; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .disclosure {
+      margin-top: 1.25rem;
+      font-size: 0.7rem;
+      line-height: 1.6;
+      color: var(--dust);
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--dust);
+      letter-spacing: 0.05em;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-name">with small. × Telltale</span>
+  </div>
+
+  <!-- STEP 1: Landing -->
+  <div id="state-landing" class="state active">
+
+    <div class="reward-pill">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/>
+        <path d="M12 8S10.5 3.5 8 4.5 9 8 12 8zM12 8s1.5-4.5 4-3.5S15 8 12 8z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      $20 Woolworths or Mitre 10 voucher — yours on finish
+    </div>
+
+    <h1 class="headline">We want the <em>honest</em> version.</h1>
+    <p class="subline">You bought from with small. — so we'd love to hear how it actually went. Three quick questions, about two minutes. Talk it through, or type if you'd rather.</p>
+
+    <div class="preview">
+      <p class="preview-label">Here's how it opens</p>
+      <div class="preview-row">
+        <div class="preview-avatar">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          </svg>
+        </div>
+        <div class="preview-bubble">"Hey — what made you pick with small. in the first place?"</div>
+      </div>
+      <div class="preview-chips">
+        <span class="preview-chip">then: what nearly stopped you</span>
+        <span class="preview-chip">then: one thing we could fix</span>
+      </div>
+    </div>
+
+    <div class="trust">
+      <span>
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+        ~2 min
+      </span>
+      <span>
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        3 questions
+      </span>
+      <span>
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+        Never public
+      </span>
+    </div>
+
+    <button class="btn-primary" id="btn-getstarted">
+      Get started
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+      </svg>
+    </button>
+    <p class="disclosure">This is a short conversation with an AI agent from with small., powered by Telltale. Whether you talk or type, it's recorded and transcribed, and your responses are used by with small. to improve their products and services. Never sold, never shared publicly. By starting, you agree to these terms.</p>
+  </div>
+
+  <!-- STEP 2: Ready / choose modality -->
+  <div id="state-ready" class="state">
+    <div class="topbar">
+      <button class="back-link" id="btn-back-ready">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+        Back
+      </button>
+      <div class="progress-dots"><div></div><div></div></div>
+    </div>
+
+    <div class="reward-chip">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/>
+      </svg>
+      $20 voucher waiting
+    </div>
+
+    <h1 class="headline">Ready when you <em>are</em>.</h1>
+    <p class="lead">Don't overthink it — just say (or type) what comes to mind. There are no wrong answers.</p>
+
+    <div class="tips">
+      <div class="tip">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 3v5h-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-5h5"/></svg>
+        <p>Fluffed it? Just start the sentence again. We're after the real story, not a polished one.</p>
+      </div>
+      <div class="tip">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <p>You're in control — pause, restart, or stop whenever you like.</p>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-voice">
+      Start talking
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/>
+        <line x1="8" y1="23" x2="16" y2="23" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <p class="micro">Your browser will ask for mic access — tap <b>Allow</b> to begin.</p>
+
+    <div class="or-divider"><div></div><span>or</span><div></div></div>
+
+    <button class="btn-secondary" id="btn-type">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><line x1="6" y1="10" x2="6" y2="10" stroke-linecap="round"/><line x1="10" y1="10" x2="10" y2="10" stroke-linecap="round"/><line x1="14" y1="10" x2="14" y2="10" stroke-linecap="round"/><line x1="18" y1="10" x2="18" y2="10" stroke-linecap="round"/><line x1="8" y1="15" x2="16" y2="15" stroke-linecap="round"/></svg>
+      Type your answers instead
+    </button>
+    <p class="micro">Somewhere quiet, or in a rush? Type it out — same questions, same reward.</p>
+  </div>
+
+  <!-- STEP 3a: Active conversation (voice) -->
+  <div id="state-active" class="state">
+    <div class="reward-chip">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
+      $20 voucher on completion
+    </div>
+    <div class="mic-wrap" id="mic-wrap">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <button class="mic-btn" id="btn-mute" title="Mute / unmute">
+        <svg id="icon-mic" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/>
+          <line x1="8"  y1="23" x2="16" y2="23" stroke-linecap="round"/>
+        </svg>
+        <svg id="icon-muted" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" opacity="0.4"/>
+          <line x1="1" y1="1" x2="23" y2="23" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <p class="status-label" id="status-label">Connecting…</p>
+    <h2 class="active-headline">We're all ears</h2>
+
+    <div class="transcript-wrap" id="transcript"></div>
+    <button class="btn-end" id="btn-end">End conversation</button>
+    <div class="timer" id="timer">0:00</div>
+  </div>
+
+  <!-- STEP 3b: Active conversation (typed) -->
+  <div id="state-text" class="state">
+    <div class="reward-chip">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
+      $20 voucher on completion
+    </div>
+    <p class="chat-status" id="chat-status">Connecting…</p>
+
+    <div class="chat" id="chat"></div>
+
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type your answer…" disabled></textarea>
+      <button class="btn-send" id="btn-send" disabled title="Send">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="text-footer-row">
+      <button class="switch-link" id="btn-switch-voice">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        Switch to talking
+      </button>
+      <button class="switch-link" id="btn-text-end">I'm done →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Post-conversation capture -->
+  <div id="state-capture" class="state">
+    <p class="capture-eyebrow">Conversation complete</p>
+    <h2 class="capture-headline">Where should we send your $20 voucher?</h2>
+    <p class="capture-subline">Pop your details in below. We'll email you a link to claim it — your choice of Woolworths or Mitre 10.</p>
+
+    <div class="reward-badge">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
+      $20 Woolworths or Mitre 10 voucher
+    </div>
+
+    <div class="fields">
+      <div class="field">
+        <label for="c-first">First name</label>
+        <input id="c-first" type="text" placeholder="Jane" autocomplete="given-name" />
+        <span class="field-error" id="ce-first">Required</span>
+      </div>
+      <div class="field">
+        <label for="c-email">Email address</label>
+        <input id="c-email" type="email" placeholder="jane@example.com" autocomplete="email" />
+        <span class="field-error" id="ce-email">Please enter a valid email</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-capture">
+      Send my reward
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+      </svg>
+    </button>
+    <p class="note">No spam, ever &nbsp;·&nbsp; Only used to deliver your reward</p>
+  </div>
+
+  <!-- STEP 5: Done -->
+  <div id="state-done" class="state">
+
+    <div class="done-header">
+      <p class="done-eyebrow">You're all set</p>
+      <h2 class="done-headline">Thanks <span id="done-name"></span>, your reward is on its way.</h2>
+      <p class="done-body">
+        Our team is reviewing your conversation — this usually takes 24 hours or less.
+        We'll email <strong id="done-email"></strong> with a link to claim your $20 voucher, redeemable at Woolworths or Mitre 10, as soon as it's been reviewed.
+      </p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="transcript-section">
+      <div class="transcript-section-label">
+        Your transcript
+        <span class="edit-hint">Feel free to edit if anything needs correcting</span>
+      </div>
+      <textarea class="transcript-editable" id="transcript-editable" placeholder="Your conversation will appear here…"></textarea>
+      <button class="btn-save" id="btn-save">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        Save edits
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">ravemarketing.co</div>
+
+<script type="module">
+  import { Conversation } from 'https://cdn.jsdelivr.net/npm/@elevenlabs/client@latest/+esm';
+
+  const AGENT_ID     = 'agent_3001kt2xr0geesetrb94hfa5ffqr';
+  const SUPABASE_URL = 'https://yufzlucfvoxgvdexzgsf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_q0TOBTuWKmV1DxSUn3clTg_76NNSfCa';
+  const VARIANT      = 'withsmall-v2';
+
+  let customer       = {};
+  let conversation   = null;
+  let startTime      = null;
+  let isMuted        = false;
+  let modality       = null;          // 'voice' | 'text'
+  let fullTranscript = [];
+
+  const $ = id => document.getElementById(id);
+
+  function getDevice()  { return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop'; }
+  function getBrowser() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Chrome') && !ua.includes('Edg'))   return 'Chrome';
+    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg'))     return 'Edge';
+    return 'Other';
+  }
+
+  function show(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    const el = $('state-' + name);
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+    el.classList.add('active');
+  }
+
+  // ── transcript rendering ──────────────────────────────────────────
+  function appendVoiceLine(role, text) {
+    const wrap = $('transcript');
+    const line = document.createElement('div');
+    line.className = 'transcript-line ' + role;
+    line.innerHTML = `<div class="transcript-speaker">${role === 'agent' ? 'with small.' : 'You'}</div>${text}`;
+    wrap.appendChild(line);
+    wrap.scrollTop = wrap.scrollHeight;
+    fullTranscript.push({ role, text });
+  }
+
+  function appendChat(role, text) {
+    const wrap = $('chat');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg ' + role;
+    msg.textContent = text;
+    wrap.appendChild(msg);
+    wrap.scrollTop = wrap.scrollHeight;
+    fullTranscript.push({ role, text });
+  }
+
+  // ── Supabase logging ──────────────────────────────────────────────
+  async function sheetsWrite(payload) {
+    const headers = {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type':  'application/json',
+    };
+    try {
+      if (payload.action === 'register') {
+        const body = { session_id: payload.sessionId };
+        if (payload.timestamp) body.created_at = payload.timestamp;
+        if (payload.variant)   body.variant    = payload.variant;
+        if (payload.device)    body.device     = payload.device;
+        if (payload.browser)   body.browser    = payload.browser;
+        if (payload.pageUrl)   body.page_url   = payload.pageUrl;
+        if (payload.firstName) body.first_name = payload.firstName;
+        if (payload.email)     body.email      = payload.email;
+        if (payload.modality)  body.modality   = payload.modality;
+        body.updated_at = new Date().toISOString();
+        await fetch(`${SUPABASE_URL}/rest/v1/sessions?on_conflict=session_id`, {
+          method:  'POST',
+          headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+          body:    JSON.stringify(body),
+        });
+      } else if (payload.action === 'complete') {
+        const body = { action: 'complete', updated_at: new Date().toISOString() };
+        if (payload.conversationId)   body.conversation_id = payload.conversationId;
+        if (payload.duration != null) body.duration_s      = payload.duration;
+        if (payload.transcript)       body.transcript      = payload.transcript;
+        if (payload.modality)         body.modality        = payload.modality;
+        if (payload.edited)           body.edited          = true;
+        await fetch(`${SUPABASE_URL}/rest/v1/sessions?session_id=eq.${encodeURIComponent(payload.sessionId)}`, {
+          method:  'PATCH',
+          headers,
+          body:    JSON.stringify(body),
+        });
+      }
+    } catch (err) {
+      console.warn('Sheets write failed:', err);
+    }
+  }
+
+  // ── timer (voice only) ────────────────────────────────────────────
+  let timerInterval = null;
+  function startTimer() {
+    const el = $('timer');
+    let secs = 0;
+    timerInterval = setInterval(() => {
+      secs++;
+      const m = Math.floor(secs / 60);
+      const s = String(secs % 60).padStart(2, '0');
+      el.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+  function stopTimer() {
+    clearInterval(timerInterval);
+    $('timer').classList.add('ending');
+  }
+
+  // ── funnel: landing → ready ───────────────────────────────────────
+  $('btn-getstarted').addEventListener('click', () => {
+    customer = {
+      sessionId: 'tb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      pageUrl:   window.location.href,
+      device:    getDevice(),
+      browser:   getBrowser(),
+      timestamp: new Date().toISOString(),
+      variant:   VARIANT,
+    };
+    // register funnel entry (modality not yet known)
+    sheetsWrite({
+      action:    'register',
+      timestamp: customer.timestamp,
+      sessionId: customer.sessionId,
+      pageUrl:   customer.pageUrl,
+      device:    customer.device,
+      browser:   customer.browser,
+      variant:   VARIANT,
+    });
+    show('ready');
+  });
+
+  $('btn-back-ready').addEventListener('click', () => show('landing'));
+
+  // ── modality choice ───────────────────────────────────────────────
+  function recordModality(m) {
+    modality = m;
+    sheetsWrite({
+      action:    'register',
+      sessionId: customer.sessionId,
+      modality:  m,
+      variant:   VARIANT,
+    });
+  }
+
+  $('btn-voice').addEventListener('click', () => {
+    recordModality('voice');
+    show('active');
+    startVoice();
+  });
+
+  $('btn-type').addEventListener('click', () => {
+    recordModality('text');
+    show('text');
+    startText();
+  });
+
+  // allow switching from text back to voice before/while typing
+  $('btn-switch-voice').addEventListener('click', async () => {
+    if (conversation) { try { await conversation.endSession(); } catch {} conversation = null; }
+    fullTranscript = [];
+    $('chat').innerHTML = '';
+    recordModality('voice');
+    show('active');
+    startVoice();
+  });
+
+  // ── VOICE path ────────────────────────────────────────────────────
+  async function startVoice() {
+    startTime = Date.now();
+    $('status-label').textContent = 'Connecting…';
+
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      $('status-label').textContent = 'Microphone access needed';
+      return;
+    }
+
+    try {
+      conversation = await Conversation.startSession({
+        agentId: AGENT_ID,
+        dynamicVariables: { session_id: customer.sessionId },
+
+        onConnect: () => {
+          $('status-label').textContent = 'Listening';
+          startTimer();
+        },
+        onMessage: ({ source, message }) => {
+          appendVoiceLine(source === 'ai' ? 'agent' : 'user', message);
+        },
+        onModeChange: ({ mode }) => {
+          const wrap  = $('mic-wrap');
+          const label = $('status-label');
+          if (mode === 'speaking') {
+            wrap.classList.add('agent-speaking');
+            label.textContent = 'with small. is speaking…';
+            label.classList.add('speaking');
+          } else {
+            wrap.classList.remove('agent-speaking');
+            label.textContent = isMuted ? 'Muted' : 'Listening';
+            label.classList.remove('speaking');
+          }
+        },
+        onDisconnect: async () => { await triggerEndingSequence(); },
+        onError: (msg) => {
+          console.error('ElevenLabs error:', msg);
+          $('status-label').textContent = 'Connection error — please refresh';
+        },
+      });
+    } catch (err) {
+      console.error('Failed to start voice session:', err);
+      $('status-label').textContent = 'Could not connect — please refresh';
+    }
+  }
+
+  $('btn-mute').addEventListener('click', () => {
+    if (!conversation) return;
+    isMuted = !isMuted;
+    conversation.setMicMuted(isMuted);
+    $('btn-mute').classList.toggle('muted', isMuted);
+    $('icon-mic').style.display   = isMuted ? 'none'  : 'block';
+    $('icon-muted').style.display = isMuted ? 'block' : 'none';
+    $('status-label').textContent = isMuted ? 'Muted' : 'Listening';
+  });
+
+  $('btn-end').addEventListener('click', async () => {
+    if (conversation) { await conversation.endSession(); }
+    else { await triggerEndingSequence(); }
+  });
+
+  // ── TEXT path ─────────────────────────────────────────────────────
+  const chatInput = $('chat-input');
+  const sendBtn   = $('btn-send');
+
+  function setChatStatus(t) { $('chat-status').textContent = t; }
+  function autoGrow() {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  }
+  function refreshSendState() {
+    sendBtn.disabled = chatInput.disabled || !chatInput.value.trim();
+  }
+
+  async function startText() {
+    startTime = Date.now();
+    setChatStatus('Connecting…');
+
+    try {
+      conversation = await Conversation.startSession({
+        agentId: AGENT_ID,
+        textOnly: true,
+        connectionType: 'websocket',
+        dynamicVariables: { session_id: customer.sessionId },
+
+        onConnect: () => {
+          setChatStatus('Your turn');
+          chatInput.disabled = false;
+          refreshSendState();
+          setTimeout(() => chatInput.focus(), 200);
+        },
+        onMessage: ({ source, message }) => {
+          // user messages are shown optimistically on send; only render agent here
+          if (source === 'ai') {
+            appendChat('agent', message);
+            setChatStatus('Your turn');
+          }
+        },
+        onModeChange: ({ mode }) => {
+          if (mode === 'speaking') setChatStatus('with small. is typing…');
+          else setChatStatus('Your turn');
+        },
+        onDisconnect: async () => { await triggerEndingSequence(); },
+        onError: (msg) => {
+          console.error('ElevenLabs error:', msg);
+          setChatStatus('Connection error — please refresh');
+        },
+      });
+    } catch (err) {
+      console.error('Failed to start text session:', err);
+      setChatStatus('Could not connect — please refresh');
+    }
+  }
+
+  function sendText() {
+    const val = chatInput.value.trim();
+    if (!val || !conversation) return;
+    appendChat('user', val);
+    try { conversation.sendUserMessage(val); }
+    catch (err) { console.error('sendUserMessage failed:', err); }
+    chatInput.value = '';
+    autoGrow();
+    refreshSendState();
+    setChatStatus('with small. is thinking…');
+  }
+
+  chatInput.addEventListener('input', () => {
+    autoGrow();
+    refreshSendState();
+    if (conversation && conversation.sendUserActivity) {
+      try { conversation.sendUserActivity(); } catch {}
+    }
+  });
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
+  });
+  sendBtn.addEventListener('click', sendText);
+
+  $('btn-text-end').addEventListener('click', async () => {
+    if (conversation) { await conversation.endSession(); }
+    else { await triggerEndingSequence(); }
+  });
+
+  // ── ending → capture (shared) ─────────────────────────────────────
+  let ending = false;
+  async function triggerEndingSequence() {
+    if (ending) return;
+    ending = true;
+
+    const duration = Math.round((Date.now() - startTime) / 1000);
+    const transcriptText = fullTranscript
+      .map(t => `${t.role === 'agent' ? 'with small.' : 'You'}: ${t.text}`)
+      .join('\n');
+
+    sheetsWrite({
+      action:         'complete',
+      sessionId:      customer.sessionId,
+      conversationId: conversation?.getId?.() || '',
+      duration,
+      transcript:     transcriptText,
+      modality,
+      variant:        VARIANT,
+    });
+
+    if (modality === 'voice') {
+      const micBtn  = $('btn-mute');
+      const micWrap = $('mic-wrap');
+      $('status-label').classList.add('ending');
+      $('btn-end').classList.add('ending');
+      micWrap.classList.add('ending');
+      micBtn.classList.add('ending');
+      stopTimer();
+      await new Promise(r => setTimeout(r, 1400));
+    } else {
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    customer._transcriptText = transcriptText;
+    show('capture');
+    setTimeout(() => $('c-first').focus(), 300);
+  }
+
+  // ── capture → done ────────────────────────────────────────────────
+  $('btn-capture').addEventListener('click', async () => {
+    const first = $('c-first').value.trim();
+    const email = $('c-email').value.trim();
+    let ok = true;
+
+    [
+      ['c-first', 'ce-first', !first],
+      ['c-email', 'ce-email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)],
+    ].forEach(([inp, err, bad]) => {
+      $(inp).classList.toggle('invalid', bad);
+      $(err).classList.toggle('visible', bad);
+      if (bad) ok = false;
+    });
+
+    if (!ok) return;
+
+    const btn = $('btn-capture');
+    btn.disabled    = true;
+    btn.textContent = 'Sending…';
+
+    customer.firstName = first;
+    customer.email     = email;
+
+    await sheetsWrite({
+      action:    'register',
+      timestamp: new Date().toISOString(),
+      sessionId: customer.sessionId,
+      firstName: customer.firstName,
+      email:     customer.email,
+      pageUrl:   customer.pageUrl,
+      device:    customer.device,
+      browser:   customer.browser,
+      modality,
+      variant:   VARIANT,
+    });
+
+    $('done-name').textContent     = customer.firstName;
+    $('done-email').textContent    = customer.email;
+    $('transcript-editable').value = customer._transcriptText || '';
+
+    show('done');
+  });
+
+  $('btn-save').addEventListener('click', async () => {
+    const edited = $('transcript-editable').value;
+    const btn    = $('btn-save');
+    btn.textContent = 'Saving…';
+
+    await sheetsWrite({
+      action:     'complete',
+      sessionId:  customer.sessionId,
+      transcript: edited,
+      edited:     true,
+      modality,
+      variant:    VARIANT,
+    });
+
+    btn.innerHTML = `
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      </svg>
+      Saved
+    `;
+    btn.classList.add('saved');
+  });
+
+</script>
+
+</body>
+</html>
