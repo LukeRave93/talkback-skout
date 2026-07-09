@@ -1027,46 +1027,86 @@
   }
 
   // ── Supabase logging ──────────────────────────────────────────────
-  async function sheetsWrite(payload) {
+  // Hardened: checks response.ok, retries with backoff, and backs up
+  // failed payloads (incl. name/email) to localStorage so captured
+  // data survives a rejected write. Backups replay on next load/write.
+  const WRITE_BACKUP_KEY = 'tb_pending_writes';
+
+  function backupWrite(payload) {
+    try {
+      const q = JSON.parse(localStorage.getItem(WRITE_BACKUP_KEY) || '[]');
+      q.push({ ...payload, _failedAt: new Date().toISOString() });
+      localStorage.setItem(WRITE_BACKUP_KEY, JSON.stringify(q.slice(-50)));
+    } catch {}
+  }
+
+  async function flushBackedUpWrites() {
+    let q = [];
+    try { q = JSON.parse(localStorage.getItem(WRITE_BACKUP_KEY) || '[]'); } catch {}
+    if (!q.length) return;
+    try { localStorage.removeItem(WRITE_BACKUP_KEY); } catch {}
+    for (const p of q) await sheetsWrite(p, { fromBackup: true });
+  }
+
+  async function sheetsWrite(payload, opts = {}) {
     const headers = {
       'apikey':        SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
       'Content-Type':  'application/json',
     };
-    try {
-      if (payload.action === 'register') {
-        const body = { session_id: payload.sessionId };
-        if (payload.timestamp) body.created_at = payload.timestamp;
-        if (payload.variant)   body.variant    = payload.variant;
-        if (payload.device)    body.device     = payload.device;
-        if (payload.browser)   body.browser    = payload.browser;
-        if (payload.pageUrl)   body.page_url   = payload.pageUrl;
-        if (payload.firstName) body.first_name = payload.firstName;
-        if (payload.email)     body.email      = payload.email;
-        if (payload.modality)  body.modality   = payload.modality;
-        body.updated_at = new Date().toISOString();
-        await fetch(`${SUPABASE_URL}/rest/v1/sessions?on_conflict=session_id`, {
-          method:  'POST',
-          headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
-          body:    JSON.stringify(body),
-        });
-      } else if (payload.action === 'complete') {
-        const body = { action: 'complete', updated_at: new Date().toISOString() };
-        if (payload.conversationId)   body.conversation_id = payload.conversationId;
-        if (payload.duration != null) body.duration_s      = payload.duration;
-        if (payload.transcript)       body.transcript      = payload.transcript;
-        if (payload.modality)         body.modality        = payload.modality;
-        if (payload.edited)           body.edited          = true;
-        await fetch(`${SUPABASE_URL}/rest/v1/sessions?session_id=eq.${encodeURIComponent(payload.sessionId)}`, {
-          method:  'PATCH',
-          headers,
-          body:    JSON.stringify(body),
-        });
-      }
-    } catch (err) {
-      console.warn('Sheets write failed:', err);
+    let url = null, init = null;
+    if (payload.action === 'register') {
+      const body = { session_id: payload.sessionId };
+      if (payload.timestamp) body.created_at = payload.timestamp;
+      if (payload.variant)   body.variant    = payload.variant;
+      if (payload.device)    body.device     = payload.device;
+      if (payload.browser)   body.browser    = payload.browser;
+      if (payload.pageUrl)   body.page_url   = payload.pageUrl;
+      if (payload.firstName) body.first_name = payload.firstName;
+      if (payload.email)     body.email      = payload.email;
+      if (payload.modality)  body.modality   = payload.modality;
+      body.updated_at = new Date().toISOString();
+      url  = `${SUPABASE_URL}/rest/v1/sessions?on_conflict=session_id`;
+      init = {
+        method:  'POST',
+        headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+        body:    JSON.stringify(body),
+      };
+    } else if (payload.action === 'complete') {
+      const body = { action: 'complete', updated_at: new Date().toISOString() };
+      if (payload.conversationId)   body.conversation_id = payload.conversationId;
+      if (payload.duration != null) body.duration_s      = payload.duration;
+      if (payload.transcript)       body.transcript      = payload.transcript;
+      if (payload.modality)         body.modality        = payload.modality;
+      if (payload.edited)           body.edited          = true;
+      url  = `${SUPABASE_URL}/rest/v1/sessions?session_id=eq.${encodeURIComponent(payload.sessionId)}`;
+      init = { method: 'PATCH', headers, body: JSON.stringify(body) };
+    } else {
+      return false;
     }
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url, init);
+        if (res.ok) {
+          if (!opts.fromBackup) flushBackedUpWrites();
+          return true;
+        }
+        const errText = await res.text().catch(() => '');
+        console.error(`Supabase write rejected (HTTP ${res.status}, attempt ${attempt}/3):`, errText, payload);
+        if (res.status >= 400 && res.status < 500 && res.status !== 429) break; // schema/auth error — retrying won't help
+      } catch (err) {
+        console.error(`Supabase write failed (attempt ${attempt}/3):`, err);
+      }
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 1000));
+    }
+    backupWrite(payload);
+    return false;
   }
+
+  // replay anything a previous (failed) session left behind
+  flushBackedUpWrites();
+  window.addEventListener('online', flushBackedUpWrites);
 
   // ── timer (voice only) ────────────────────────────────────────────
   let timerInterval = null;
